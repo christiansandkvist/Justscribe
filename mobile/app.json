@@ -1,29 +1,29 @@
 {
   "expo": {
-    "name": "Justscribe",
-    "slug": "justscribe",
+    "name": "ScribeToGo",
+    "slug": "scribetogo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
+      "backgroundColor": "#0A0A0F"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.justscribe.app",
+      "bundleIdentifier": "com.scribetogo.app",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Justscribe needs microphone access to record audio for transcription."
+        "NSMicrophoneUsageDescription": "ScribeToGo needs microphone access to record audio for transcription."
       }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#0a0a0a"
       },
-      "package": "com.justscribe.app",
+      "package": "com.scribetogo.app",
       "permissions": ["RECORD_AUDIO"]
     },
     "web": {
@@ -35,7 +35,7 @@
       "expo-router",
       "expo-av"
     ],
-    "scheme": "justscribe",
+    "scheme": "scribetogo",
     "extra": {
       "router": {
         "root": "src/app"

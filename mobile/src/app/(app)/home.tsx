@@ -63,7 +63,15 @@ export default function HomeScreen() {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>Justscribe</Text>
+          <Text style={styles.wordmark}>
+            <Text style={styles.wBold}>S</Text>
+            <Text style={styles.wLight}>cribe</Text>
+            <Text style={styles.wBold}>T</Text>
+            <Text style={styles.wLight}>o</Text>
+            <Text style={styles.wBold}>G</Text>
+            <Text style={styles.wLight}>o</Text>
+            <Text style={styles.wSmall}>.com</Text>
+          </Text>
           <BalanceBadge balanceUsdDisplay={balance_usd_display} loading={loading} />
         </View>
 
@@ -147,11 +155,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  logo: {
+  wordmark: {
     fontSize: 28,
-    fontWeight: '800',
-    color: Colors.primary,
+    color: Colors.accent,
+    letterSpacing: -0.5,
   },
+  wBold: { fontWeight: '800' },
+  wLight: { fontWeight: '300' },
+  wSmall: { fontSize: 17, fontWeight: '300' },
   actions: {
     flex: 1,
     justifyContent: 'center',
@@ -198,7 +209,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalSheet: {
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: Spacing.xl,

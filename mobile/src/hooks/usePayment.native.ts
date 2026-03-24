@@ -20,7 +20,7 @@ export function usePayment() {
 
         const { error: initError } = await initPaymentSheet({
           paymentIntentClientSecret: data.client_secret,
-          merchantDisplayName: 'Justscribe',
+          merchantDisplayName: 'ScribeToGo',
           allowsDelayedPaymentMethods: false,
         });
 

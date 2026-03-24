@@ -7,9 +7,9 @@ const CREDITS_PER_USD = 100;
 
 // Bonus tiers
 const BONUS_TIERS = [
-  { min_cents: 5000, bonus: 0.4 },  // $50+ → 40% bonus
-  { min_cents: 2500, bonus: 0.2 },  // $25+ → 20% bonus
-  { min_cents: 1000, bonus: 0.1 },  // $10+ → 10% bonus
+  { min_cents: 5000, bonus: 0.2 },  // $50+ → 20% bonus
+  { min_cents: 2500, bonus: 0.1 },  // $25+ → 10% bonus
+  { min_cents: 1000, bonus: 0.05 }, // $10+ → 5% bonus
   { min_cents: 0,    bonus: 0 },
 ];
 

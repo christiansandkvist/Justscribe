@@ -1,0 +1,27 @@
+{
+  "name": "scribetogo-mcp",
+  "version": "1.0.0",
+  "description": "ScribeToGo MCP server — transcription tools for Claude",
+  "type": "module",
+  "bin": {
+    "scribetogo-mcp": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod 755 build/index.js",
+    "dev": "tsx src/index.ts",
+    "start": "node build/index.js"
+  },
+  "dependencies": {
+    "@google-cloud/speech": "^6.7.0",
+    "@modelcontextprotocol/sdk": "^1.10.1",
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5",
+    "stripe": "^16.3.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  }
+}

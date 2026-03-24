@@ -8,26 +8,36 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuthStore } from '../../store/authStore';
-import { Colors, Typography, Spacing, BorderRadius } from '../../constants/theme';
+import { Colors, Spacing, BorderRadius } from '../../constants/theme';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signIn, loading } = useAuthStore();
+  const { signIn, signInWithGoogle, loading } = useAuthStore();
 
   async function handleLogin() {
-    if (!email || !password) {
-      Alert.alert('Fel', 'Ange e-post och lösenord.');
+    if (!email.trim() || !password) {
+      Alert.alert('Missing fields', 'Please enter your email and password.');
       return;
     }
     try {
       await signIn(email.trim().toLowerCase(), password);
       router.replace('/(app)/home');
     } catch (err: any) {
-      Alert.alert('Inloggning misslyckades', err.message ?? 'Försök igen.');
+      Alert.alert('Login failed', err.message ?? 'Please try again.');
+    }
+  }
+
+  async function handleGoogle() {
+    try {
+      await signInWithGoogle();
+      if (Platform.OS !== 'web') router.replace('/(app)/home');
+    } catch (err: any) {
+      Alert.alert('Google sign-in failed', err.message ?? 'Please try again.');
     }
   }
 
@@ -36,101 +46,241 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.inner}>
-        <Text style={styles.logo}>Justscribe</Text>
-        <Text style={styles.tagline}>Transkribering på sekunden</Text>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Logo */}
+        <View style={styles.header}>
+          <Text style={styles.wordmark}>
+            <Text style={styles.wBold}>S</Text>
+            <Text style={styles.wLight}>cribe</Text>
+            <Text style={styles.wBold}>T</Text>
+            <Text style={styles.wLight}>o</Text>
+            <Text style={styles.wBold}>G</Text>
+            <Text style={styles.wLight}>o</Text>
+            <Text style={styles.wSmall}>.com</Text>
+          </Text>
+          <Text style={styles.tagline}>Pay only for what you transcribe</Text>
+        </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="E-post"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholderTextColor={Colors.secondary}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Lösenord"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor={Colors.secondary}
-        />
+        {/* Form */}
+        <View style={styles.form}>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholderTextColor={Colors.secondary}
+            returnKeyType="next"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholderTextColor={Colors.secondary}
+            returnKeyType="done"
+            onSubmitEditing={handleLogin}
+          />
 
+          <TouchableOpacity
+            style={[styles.btnPrimary, loading && styles.btnDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.btnPrimaryText}>
+              {loading ? 'Signing in…' : 'Log in'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Divider */}
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        {/* Google */}
         <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
+          style={[styles.btnGoogle, loading && styles.btnDisabled]}
+          onPress={handleGoogle}
           disabled={loading}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
-          <Text style={styles.buttonText}>{loading ? 'Loggar in...' : 'Logga in'}</Text>
+          <GoogleIcon />
+          <Text style={styles.btnGoogleText}>Continue with Google</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push('/(auth)/register')} style={styles.link}>
-          <Text style={styles.linkText}>Inget konto? Skapa ett här</Text>
+        {/* Footer */}
+        <TouchableOpacity
+          style={styles.footer}
+          onPress={() => router.push('/(auth)/register')}
+        >
+          <Text style={styles.footerText}>
+            Don't have an account?{' '}
+            <Text style={styles.footerLink}>Register</Text>
+          </Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
+
+function GoogleIcon() {
+  return (
+    <View style={googleIconStyles.container}>
+      {/* Simplified Google 'G' using colored text — no image dependency */}
+      <Text style={googleIconStyles.g}>G</Text>
+    </View>
+  );
+}
+
+const googleIconStyles = StyleSheet.create({
+  container: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Spacing.sm,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  g: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#4285F4',
+    lineHeight: 17,
+  },
+});
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
   },
-  inner: {
-    flex: 1,
-    padding: Spacing.xl,
+  scroll: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: 80,
+    paddingBottom: Spacing.xl,
     justifyContent: 'center',
-    gap: Spacing.md,
+    gap: Spacing.lg,
   },
-  logo: {
+
+  // Header
+  header: {
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: Spacing.md,
+  },
+  wordmark: {
     fontSize: 40,
+    color: Colors.accent,
+    letterSpacing: -0.5,
+  },
+  wBold: {
     fontWeight: '800',
-    color: Colors.primary,
-    textAlign: 'center',
-    marginBottom: Spacing.xs,
+  },
+  wLight: {
+    fontWeight: '300',
+  },
+  wSmall: {
+    fontSize: 24,
+    fontWeight: '300',
   },
   tagline: {
-    ...Typography.bodySmall,
-    textAlign: 'center',
-    marginBottom: Spacing.xl,
+    fontSize: 15,
+    color: Colors.secondary,
+    fontWeight: '400',
+  },
+
+  // Form
+  form: {
+    gap: Spacing.sm,
   },
   input: {
-    height: 56,
+    height: 52,
     borderWidth: 1.5,
     borderColor: Colors.border,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
-    ...Typography.body,
+    fontSize: 16,
+    color: Colors.primary,
     backgroundColor: Colors.surface,
   },
-  button: {
-    height: 56,
+
+  // Primary button
+  btnPrimary: {
+    height: 52,
     backgroundColor: Colors.primary,
     borderRadius: BorderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: Spacing.sm,
+    marginTop: Spacing.xs,
   },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: Colors.white,
+  btnPrimaryText: {
+    color: Colors.onPrimary,
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
   },
-  link: {
+  btnDisabled: {
+    opacity: 0.45,
+  },
+
+  // Divider
+  divider: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: Spacing.sm,
+    gap: Spacing.sm,
   },
-  linkText: {
-    ...Typography.bodySmall,
-    color: Colors.accent,
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  dividerText: {
+    fontSize: 13,
+    color: Colors.secondary,
+  },
+
+  // Google button
+  btnGoogle: {
+    height: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: BorderRadius.md,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    backgroundColor: Colors.white,
+  },
+  btnGoogleText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.onPrimary,
+  },
+
+  // Footer
+  footer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+  },
+  footerText: {
+    fontSize: 14,
+    color: Colors.secondary,
+  },
+  footerLink: {
+    color: Colors.primary,
     fontWeight: '600',
   },
 });

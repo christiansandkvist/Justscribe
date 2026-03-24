@@ -1,0 +1,5 @@
+node_modules/
+build/
+.env
+gcp-key.json
+*.tmp

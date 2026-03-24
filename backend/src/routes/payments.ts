@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { requireAuth } from '../middleware/auth';
 import { createPaymentIntent, handleWebhookEvent } from '../services/stripeService';
+import { stripe } from '../config/stripe';
 
 const router = Router();
 
@@ -26,6 +27,16 @@ router.post('/create-intent', requireAuth, async (req: Request, res: Response, n
     });
 
     res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/payments/connection-token — Stripe Terminal
+router.post('/connection-token', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = await stripe.terminal.connectionTokens.create();
+    res.json({ secret: token.secret });
   } catch (err) {
     next(err);
   }

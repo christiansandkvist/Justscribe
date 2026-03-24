@@ -1,7 +1,7 @@
 {
-  "name": "justscribe-backend",
+  "name": "scribetogo-backend",
   "version": "1.0.0",
-  "description": "Justscribe backend API",
+  "description": "ScribeToGo backend API",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",

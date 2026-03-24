@@ -9,7 +9,7 @@ import usageRouter from './routes/usage';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
-const PORT = process.env.PORT ?? 3000;
+const PORT = process.env.PORT || 3000;
 
 // CORS
 app.use(
@@ -40,8 +40,6 @@ app.use('/api/usage', usageRouter);
 // Global error handler (must be last)
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`[server] Justscribe backend running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
 
 export default app;

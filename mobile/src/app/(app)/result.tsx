@@ -42,7 +42,7 @@ export default function ResultScreen() {
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
     const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-    const filename = `justscribe_${timestamp}.txt`;
+    const filename = `scribetogo_${timestamp}.txt`;
 
     try {
       const fileUri = FileSystem.cacheDirectory + filename;
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btnPrimaryText: {
-    color: Colors.white,
+    color: Colors.onPrimary,
     fontSize: 16,
     fontWeight: '700',
   },

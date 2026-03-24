@@ -8,9 +8,10 @@ const WEB_EMPTY_MODULES = [
   '@stripe/stripe-react-native',
   'react-native/Libraries/Utilities/Platform.ios',
   'react-native/Libraries/Utilities/Platform.android',
-  // jimp-compact is a build tool pulled in by @expo/image-utils — not runtime
   'jimp-compact',
   '@jimp/core',
+  // expo-web-browser is native-only; Google OAuth on web uses window.location redirect
+  'expo-web-browser',
 ];
 
 // ── On web: redirect react-native → react-native-web ─────────────────────

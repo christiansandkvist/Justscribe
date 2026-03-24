@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "scribetogo": {
+      "command": "node",
+      "args": ["/Users/h.a.r.eab/justscribe/mcp/build/index.js"],
+      "env": {
+        "SUPABASE_URL": "https://your-project.supabase.co",
+        "SUPABASE_SERVICE_ROLE_KEY": "your-service-role-key",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/Users/h.a.r.eab/justscribe/mcp/gcp-key.json",
+        "GOOGLE_CLOUD_PROJECT_ID": "your-gcp-project-id",
+        "STRIPE_SECRET_KEY": "sk_test_...",
+        "STRIPE_SUCCESS_URL": "https://scribetogo.app/topup/success",
+        "STRIPE_CANCEL_URL": "https://scribetogo.app/topup/cancel"
+      }
+    }
+  }
+}

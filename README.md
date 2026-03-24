@@ -1,4 +1,4 @@
-# Justscribe
+# ScribeToGo
 
 Pay-as-you-go transcription. One tap. Speak. Get a text file. No subscription.
 

@@ -1,16 +1,17 @@
 export const Colors = {
-  background: '#FFFFFF',
-  surface: '#F5F5F5',
-  primary: '#1A1A1A',
-  secondary: '#666666',
-  accent: '#FF3B30',        // red for record button
-  accentLight: '#FFF0EF',
-  success: '#34C759',
-  warning: '#FF9500',
-  border: '#E5E5E5',
-  white: '#FFFFFF',
-  balanceBg: '#F0F9F0',
-  balanceText: '#1A7A1A',
+  background:  '#0a0a0a',
+  surface:     '#111111',
+  primary:     '#FFFFFF',
+  onPrimary:   '#0a0a0a',
+  secondary:   '#888888',
+  accent:      '#1D9E75',
+  accentLight: '#0d2b22',
+  success:     '#1D9E75',
+  warning:     '#FF9500',
+  border:      '#2a2a2a',
+  white:       '#FFFFFF',
+  balanceBg:   '#0d2b22',
+  balanceText: '#1D9E75',
 };
 
 export const Typography = {
