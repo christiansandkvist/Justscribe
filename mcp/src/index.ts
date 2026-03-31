@@ -7,6 +7,7 @@ import { registerTranscribeFileTool } from './tools/transcribeFile.js';
 import { registerTranscribeLiveTool } from './tools/transcribeLive.js';
 import { registerGetBalanceTool } from './tools/getBalance.js';
 import { registerTopUpTool } from './tools/topUp.js';
+import { registerSaveTranscriptTool } from './tools/saveTranscript.js';
 
 const server = new McpServer({
   name: 'scribetogo',
@@ -17,6 +18,7 @@ registerTranscribeFileTool(server);
 registerTranscribeLiveTool(server);
 registerGetBalanceTool(server);
 registerTopUpTool(server);
+registerSaveTranscriptTool(server);
 
 async function main() {
   const transport = new StdioServerTransport();
