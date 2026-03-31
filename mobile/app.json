@@ -15,7 +15,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.scribetogo.app",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "ScribeToGo needs microphone access to record audio for transcription."
+        "NSMicrophoneUsageDescription": "ScribeToGo needs microphone access to record audio for transcription.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -24,7 +25,11 @@
         "backgroundColor": "#0a0a0a"
       },
       "package": "com.scribetogo.app",
-      "permissions": ["RECORD_AUDIO"]
+      "permissions": [
+        "RECORD_AUDIO",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -41,7 +46,7 @@
         "root": "src/app"
       },
       "eas": {
-        "projectId": "your-eas-project-id"
+        "projectId": "7cb033f7-e9b5-42b3-8964-99171bf5b28d"
       }
     }
   }
