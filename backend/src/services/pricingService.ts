@@ -3,8 +3,8 @@ import { TranscriptionModel, PricingConfig } from '../types';
 
 // Fallback defaults if DB not seeded yet
 const DEFAULTS: Record<TranscriptionModel, PricingConfig> = {
-  standard: { model: 'standard', credits_per_second: 0.004, usd_per_credit: 0.01 },
-  chirp: { model: 'chirp', credits_per_second: 0.0168, usd_per_credit: 0.01 },
+  standard: { model: 'standard', credits_per_second: 0.0533, usd_per_credit: 0.01 },
+  chirp: { model: 'chirp', credits_per_second: 0.0133, usd_per_credit: 0.01 },
 };
 
 export async function getPricingConfig(model: TranscriptionModel): Promise<PricingConfig> {

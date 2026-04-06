@@ -119,7 +119,7 @@ export function base64ToTempFile(base64: string, mimeType: string): string {
     'video/mp4':  '.mp4',
   };
   const ext = extMap[mimeType.toLowerCase()] ?? '.mp3';
-  const filePath = path.join(os.tmpdir(), `scribetogo_${randomUUID()}${ext}`);
+  const filePath = path.join(os.tmpdir(), `vocri_${randomUUID()}${ext}`);
   fs.writeFileSync(filePath, Buffer.from(base64, 'base64'));
   return filePath;
 }

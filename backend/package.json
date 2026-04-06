@@ -1,5 +1,5 @@
 {
-  "name": "scribetogo-backend",
+  "name": "vocri-backend",
   "version": "1.0.0",
   "description": "ScribeToGo backend API",
   "main": "dist/index.js",

@@ -1,10 +1,10 @@
 {
-  "name": "scribetogo-mcp",
+  "name": "vocri-mcp",
   "version": "1.0.0",
-  "description": "ScribeToGo MCP server — transcription tools for Claude",
+  "description": "Vocri MCP server — transcription tools for Claude",
   "type": "module",
   "bin": {
-    "scribetogo-mcp": "./build/index.js"
+    "vocri-mcp": "./build/index.js"
   },
   "scripts": {
     "build": "tsc && chmod 755 build/index.js",

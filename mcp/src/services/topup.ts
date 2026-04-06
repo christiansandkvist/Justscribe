@@ -56,7 +56,7 @@ export async function createCheckoutSession(
           currency: 'usd',
           unit_amount: pkg.cents,
           product_data: {
-            name: `ScribeToGo — ${pkg.credits} credits`,
+            name: `Vocri — ${pkg.credits} credits`,
             description: `Prepaid transcription credits (${pkg.label})`,
           },
         },
@@ -65,8 +65,8 @@ export async function createCheckoutSession(
     ],
     mode: 'payment',
     metadata: { user_id: userId, credits_to_add: String(pkg.credits) },
-    success_url: process.env.STRIPE_SUCCESS_URL ?? 'https://scribetogo.app/topup/success',
-    cancel_url:  process.env.STRIPE_CANCEL_URL  ?? 'https://scribetogo.app/topup/cancel',
+    success_url: process.env.STRIPE_SUCCESS_URL ?? 'https://vocri.app/topup/success',
+    cancel_url:  process.env.STRIPE_CANCEL_URL  ?? 'https://vocri.app/topup/cancel',
   });
 
   // Record pending payment

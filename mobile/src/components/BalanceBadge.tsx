@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors, Typography, Spacing, BorderRadius } from '../constants/theme';
 
 interface Props {
   balanceUsdDisplay: string;
@@ -9,31 +8,15 @@ interface Props {
 
 export function BalanceBadge({ balanceUsdDisplay, loading }: Props) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Saldo</Text>
-      <Text style={styles.amount}>{loading ? '—' : balanceUsdDisplay}</Text>
+    <View style={s.container}>
+      <Text style={s.label}>Saldo</Text>
+      <Text style={s.amount}>{loading ? '—' : balanceUsdDisplay}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.balanceBg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
-    gap: Spacing.xs,
-  },
-  label: {
-    ...Typography.bodySmall,
-    color: Colors.balanceText,
-    fontWeight: '600',
-  },
-  amount: {
-    ...Typography.body,
-    color: Colors.balanceText,
-    fontWeight: '700',
-  },
+const s = StyleSheet.create({
+  container: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#131328', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 99, gap: 4, borderWidth: 1, borderColor: 'rgba(100,180,255,0.12)' },
+  label:     { fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: '500' },
+  amount:    { fontSize: 13, color: '#ffffff', fontWeight: '600' },
 });

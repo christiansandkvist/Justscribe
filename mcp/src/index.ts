@@ -10,7 +10,7 @@ import { registerTopUpTool } from './tools/topUp.js';
 import { registerSaveTranscriptTool } from './tools/saveTranscript.js';
 
 const server = new McpServer({
-  name: 'scribetogo',
+  name: 'vocri',
   version: '1.0.0',
 });
 
@@ -23,10 +23,10 @@ registerSaveTranscriptTool(server);
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('[scribetogo-mcp] Server running on stdio');
+  console.error('[vocri-mcp] Server running on stdio');
 }
 
 main().catch((err) => {
-  console.error('[scribetogo-mcp] Fatal error:', err);
+  console.error('[vocri-mcp] Fatal error:', err);
   process.exit(1);
 });

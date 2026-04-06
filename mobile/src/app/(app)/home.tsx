@@ -1,23 +1,110 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  SafeAreaView, Modal, Alert, ScrollView,
+  SafeAreaView, Modal, Alert, ScrollView, Animated, StatusBar,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useBalance } from '../../hooks/useBalance';
 import { usePayment } from '../../hooks/usePayment';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
-import { BalanceBadge } from '../../components/BalanceBadge';
-import { Colors, Typography, Spacing, BorderRadius } from '../../constants/theme';
 import { pickAudioFile, getAudioDuration } from '../../services/fileService';
 import { TOP_UP_PACKAGES } from '../../constants/pricing';
 import type { TopUpPackage } from '../../types';
 
+const C = {
+  bg:        '#0d0d1a',
+  surface:   '#131328',
+  border:    'rgba(100,180,255,0.12)',
+  white:     '#ffffff',
+  white70:   'rgba(255,255,255,0.70)',
+  white55:   'rgba(255,255,255,0.55)',
+  white35:   'rgba(255,255,255,0.35)',
+  white25:   'rgba(255,255,255,0.25)',
+  white08:   'rgba(255,255,255,0.08)',
+  white05:   'rgba(255,255,255,0.05)',
+  cyan:      '#64b4ff',
+  purple:    '#a78bfa',
+  teal:      '#5DCAA5',
+  cyanDim:   'rgba(100,180,255,0.12)',
+};
+
+const WaveformIcon: React.FC<{ size?: number }> = ({ size = 20 }) => {
+  const bars = [0.45, 0.75, 1, 0.75, 0.45];
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2.5, height: size }}>
+      {bars.map((ratio, i) => (
+        <LinearGradient
+          key={i}
+          colors={[C.cyan, C.purple]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ width: 2.5, height: size * ratio, borderRadius: 1.5, opacity: 0.85 }}
+        />
+      ))}
+    </View>
+  );
+};
+
+const BalanceCard: React.FC<{
+  balanceCredits: number;
+  loading: boolean;
+  onTopUp: () => void;
+}> = ({ balanceCredits, loading, onTopUp }) => {
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const MAX_CREDITS = 500;
+  const fillPct = Math.min((balanceCredits / MAX_CREDITS) * 100, 100);
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: fillPct,
+      duration: 900,
+      useNativeDriver: false,
+    }).start();
+  }, [fillPct]);
+
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+  });
+
+  const standardMins = Math.floor(balanceCredits / (0.0133 * 60));
+  const fastMins = Math.floor(balanceCredits / (0.0533 * 60));
+  const usdDisplay = '$' + (balanceCredits * 0.01).toFixed(2);
+
+  return (
+    <View style={s.balCard}>
+      <View style={s.balTop}>
+        <Text style={s.balLabel}>Balance</Text>
+        <View style={s.activeBadge}>
+          <Text style={s.activeBadgeText}>Active</Text>
+        </View>
+      </View>
+      <Text style={s.balAmount}>{loading ? '—' : usdDisplay}</Text>
+      <Text style={s.balSub}>{loading ? '—' : balanceCredits} credits</Text>
+      <Text style={s.balMins}>{loading ? '' : `Standard: ~${standardMins}min · Fast: ~${fastMins}min`}</Text>
+      <View style={s.progressTrack}>
+        <Animated.View style={[s.progressFillWrap, { width: progressWidth }]}>
+          <LinearGradient
+            colors={[C.cyan, C.purple]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
+      </View>
+      <TouchableOpacity onPress={onTopUp} style={s.topUpInline} activeOpacity={0.7}>
+        <Text style={s.topUpInlineText}>+ Add credits</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 export default function HomeScreen() {
   const { balance_credits, balance_usd_display, loading, refresh } = useBalance();
   const { topUp, loading: paymentLoading } = usePayment();
-  const { signOut } = useAuthStore();
+  const { signOut, user } = useAuthStore();
   const { t, language, setLanguage } = useLanguageStore();
   const [showTopUp, setShowTopUp] = useState(false);
 
@@ -44,72 +131,79 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.wordmark}>
-            <Text style={styles.wBold}>S</Text><Text style={styles.wLight}>cribe</Text>
-            <Text style={styles.wBold}>T</Text><Text style={styles.wLight}>o</Text>
-            <Text style={styles.wBold}>G</Text><Text style={styles.wLight}>o</Text>
-          </Text>
-          <View style={styles.headerRight}>
-            <BalanceBadge balanceUsdDisplay={balance_usd_display} loading={loading} />
-            <View style={styles.langToggle}>
-              <TouchableOpacity
-                style={[styles.langBtn, language === 'en' && styles.langBtnActive]}
-                onPress={() => setLanguage('en')}>
-                <Text style={[styles.langBtnText, language === 'en' && styles.langBtnTextActive]}>EN</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.langBtn, language === 'sv' && styles.langBtnActive]}
-                onPress={() => setLanguage('sv')}>
-                <Text style={[styles.langBtnText, language === 'sv' && styles.langBtnTextActive]}>SV</Text>
-              </TouchableOpacity>
+    <SafeAreaView style={s.safe}>
+      <StatusBar barStyle="light-content" backgroundColor={C.bg} />
+      <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={s.nav}>
+          <View style={s.navLogo}>
+            <WaveformIcon size={18} />
+            <Text style={s.navLogoText}>Vocri</Text>
+          </View>
+          <View style={s.navRight}>
+            <View style={s.langToggle}>
+              {(['en', 'sv'] as const).map((lang) => (
+                <TouchableOpacity
+                  key={lang}
+                  style={[s.langBtn, language === lang && s.langBtnActive]}
+                  onPress={() => setLanguage(lang)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[s.langBtnText, language === lang && s.langBtnTextActive]}>
+                    {lang.toUpperCase()}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
+            <TouchableOpacity onPress={async () => { console.log('signOut pressed, user:', user?.email); await signOut(); console.log('signOut done'); }} style={s.signOutBtn} activeOpacity={0.7}>
+              {user?.email && <Text style={s.signOutEmail}>{user.email}</Text>}
+              <Text style={s.signOutText}>{t.home.signOut}</Text>
+            </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.actionBtn} onPress={handleRecord} activeOpacity={0.85}>
-            <Text style={styles.actionIcon}>🎤</Text>
-            <Text style={styles.actionLabel}>{t.home.recordLive}</Text>
+
+        <BalanceCard
+          balanceCredits={balance_credits ?? 0}
+          loading={loading}
+          onTopUp={() => setShowTopUp(true)}
+        />
+
+        <Text style={s.sectionTitle}>Quick actions</Text>
+        <View style={s.actionGrid}>
+          <TouchableOpacity style={[s.actionBtn, s.actionBtnAccent]} onPress={handleRecord} activeOpacity={0.75}>
+            <LinearGradient colors={[C.cyan, C.purple]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[StyleSheet.absoluteFill, { borderRadius: 14 }]} />
+            <Text style={[s.actionLabel, s.actionLabelAccent]}>{t.home.recordLive}</Text>
+            <Text style={[s.actionSub, s.actionSubAccent]}>Microphone</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn} onPress={handleUpload} activeOpacity={0.85}>
-            <Text style={styles.actionIcon}>📁</Text>
-            <Text style={styles.actionLabel}>{t.home.uploadFile}</Text>
+          <TouchableOpacity style={s.actionBtn} onPress={handleUpload} activeOpacity={0.75}>
+            <Text style={s.actionLabel}>{t.home.uploadFile}</Text>
+            <Text style={s.actionSub}>Audio file</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.footer}>
-          <TouchableOpacity onPress={() => setShowTopUp(true)} style={styles.topUpLink}>
-            <Text style={styles.topUpText}>{t.home.topUp}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={signOut} style={styles.signOutLink}>
-            <Text style={styles.signOutText}>{t.home.signOut}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
+
       <Modal visible={showTopUp} animationType="slide" transparent onRequestClose={() => setShowTopUp(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <Text style={styles.modalTitle}>{t.topup.title}</Text>
-            <Text style={styles.modalSubtitle}>{t.topup.subtitle}</Text>
-            <ScrollView style={styles.packages}>
+        <View style={s.modalOverlay}>
+          <View style={s.modalSheet}>
+            <View style={s.modalHandle} />
+            <Text style={s.modalTitle}>{t.topup.title}</Text>
+            <Text style={s.modalSubtitle}>{t.topup.subtitle}</Text>
+            <ScrollView style={s.packages} showsVerticalScrollIndicator={false}>
               {TOP_UP_PACKAGES.map((pkg) => (
-                <TouchableOpacity key={pkg.amount_usd_cents} style={styles.packageRow}
-                  onPress={() => handleTopUp(pkg)} disabled={paymentLoading} activeOpacity={0.8}>
+                <TouchableOpacity key={pkg.amount_usd_cents} style={s.packageRow} onPress={() => handleTopUp(pkg)} disabled={paymentLoading} activeOpacity={0.75}>
                   <View>
-                    <Text style={styles.packageLabel}>{pkg.label}</Text>
-                    <Text style={styles.packageCredits}>{pkg.credits} credits</Text>
+                    <Text style={s.packageLabel}>{pkg.label}</Text>
+                    <Text style={s.packageCredits}>{pkg.credits} credits</Text>
                   </View>
                   {pkg.bonus_pct && (
-                    <View style={styles.bonusBadge}>
-                      <Text style={styles.bonusText}>+{pkg.bonus_pct}% bonus</Text>
+                    <View style={s.bonusBadge}>
+                      <Text style={s.bonusText}>+{pkg.bonus_pct}% bonus</Text>
                     </View>
                   )}
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowTopUp(false)}>
-              <Text style={styles.cancelText}>{t.topup.cancel}</Text>
+            <TouchableOpacity style={s.cancelBtn} onPress={() => setShowTopUp(false)}>
+              <Text style={s.cancelText}>{t.topup.cancel}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -118,38 +212,53 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
-  container: { flex: 1, padding: Spacing.xl, justifyContent: 'space-between' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  wordmark: { fontSize: 28, color: Colors.accent, letterSpacing: -0.5 },
-  wBold: { fontWeight: '800' },
-  wLight: { fontWeight: '300' },
-  langToggle: { flexDirection: 'row', backgroundColor: Colors.surface, borderRadius: BorderRadius.full, borderWidth: 1, borderColor: Colors.border, padding: 3, gap: 2 },
-  langBtn: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: BorderRadius.full },
-  langBtnActive: { backgroundColor: Colors.accent },
-  langBtnText: { fontSize: 11, fontWeight: '700', color: Colors.secondary },
-  langBtnTextActive: { color: Colors.white },
-  actions: { flex: 1, justifyContent: 'center', gap: Spacing.lg },
-  actionBtn: { backgroundColor: Colors.surface, borderRadius: BorderRadius.lg, padding: Spacing.xl, alignItems: 'center', gap: Spacing.sm, borderWidth: 1.5, borderColor: Colors.border },
-  actionIcon: { fontSize: 48 },
-  actionLabel: { ...Typography.h3 },
-  footer: { alignItems: 'center', gap: Spacing.sm },
-  topUpLink: { padding: Spacing.sm },
-  topUpText: { ...Typography.body, color: Colors.accent, fontWeight: '700' },
-  signOutLink: { padding: Spacing.sm },
-  signOutText: { ...Typography.bodySmall, color: Colors.secondary },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalSheet: { backgroundColor: Colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: Spacing.xl, gap: Spacing.md },
-  modalTitle: { ...Typography.h2 },
-  modalSubtitle: { ...Typography.bodySmall },
-  packages: { maxHeight: 280 },
-  packageRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: Spacing.md, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  packageLabel: { ...Typography.h3 },
-  packageCredits: { ...Typography.bodySmall },
-  bonusBadge: { backgroundColor: Colors.success, paddingHorizontal: Spacing.sm, paddingVertical: 4, borderRadius: BorderRadius.full },
-  bonusText: { color: Colors.white, fontSize: 12, fontWeight: '700' },
-  cancelBtn: { alignItems: 'center', padding: Spacing.md },
-  cancelText: { ...Typography.body, color: Colors.secondary },
+const s = StyleSheet.create({
+  safe:              { flex: 1, backgroundColor: C.bg },
+  scroll:            { flex: 1 },
+  scrollContent:     { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 40 },
+  nav:               { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  navLogo:           { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  navLogoText:       { fontSize: 18, fontWeight: '600', color: C.white, letterSpacing: -0.5 },
+  navRight:          { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  langToggle:        { flexDirection: 'row', backgroundColor: C.surface, borderRadius: 99, borderWidth: 1, borderColor: C.white08, padding: 3, gap: 2 },
+  langBtn:           { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99 },
+  langBtnActive:     { backgroundColor: C.purple },
+  langBtnText:       { fontSize: 11, fontWeight: '700', color: C.white35 },
+  langBtnTextActive: { color: C.white },
+  signOutBtn:        { paddingHorizontal: 16, paddingVertical: 10, alignItems: 'flex-end' },
+  signOutEmail:      { fontSize: 11, color: C.white35, marginBottom: 2 },
+  signOutText:       { fontSize: 12, color: C.white35 },
+  balCard:           { backgroundColor: C.surface, borderRadius: 16, padding: 18, marginBottom: 24, borderWidth: 1, borderColor: C.border },
+  balTop:            { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  balLabel:          { fontSize: 11, color: C.white35, textTransform: 'uppercase', letterSpacing: 0.8 },
+  activeBadge:       { backgroundColor: C.cyanDim, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 3 },
+  activeBadgeText:   { fontSize: 10, color: C.cyan, fontWeight: '500' },
+  balAmount:         { fontSize: 40, fontWeight: '600', color: C.white, letterSpacing: -1.5, marginBottom: 2 },
+  balSub:            { fontSize: 12, color: C.white35, marginBottom: 2 },
+  balMins:           { fontSize: 12, color: C.white35, marginBottom: 16 },
+  progressTrack:     { height: 3, backgroundColor: C.white05, borderRadius: 99, overflow: 'hidden', marginBottom: 14 },
+  progressFillWrap:  { height: '100%', borderRadius: 99, overflow: 'hidden' },
+  topUpInline:       { alignSelf: 'flex-start', backgroundColor: C.cyanDim, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
+  topUpInlineText:   { fontSize: 12, color: C.cyan, fontWeight: '500' },
+  sectionTitle:      { fontSize: 11, fontWeight: '500', color: C.white25, textTransform: 'uppercase', letterSpacing: 0.9, marginBottom: 12 },
+  actionGrid:        { flexDirection: 'row', gap: 12 },
+  actionBtn:         { flex: 1, backgroundColor: C.surface, borderRadius: 14, padding: 18, borderWidth: 1, borderColor: C.white05, overflow: 'hidden' },
+  actionBtnAccent:   { borderColor: 'transparent' },
+  actionLabel:       { fontSize: 14, fontWeight: '600', color: C.white70, marginBottom: 3 },
+  actionLabelAccent: { color: C.white },
+  actionSub:         { fontSize: 12, color: C.white35 },
+  actionSubAccent:   { color: 'rgba(255,255,255,0.65)' },
+  modalOverlay:      { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalSheet:        { backgroundColor: C.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, gap: 12, borderTopWidth: 1, borderColor: C.white08 },
+  modalHandle:       { width: 36, height: 4, backgroundColor: C.white25, borderRadius: 99, alignSelf: 'center', marginBottom: 8 },
+  modalTitle:        { fontSize: 18, fontWeight: '600', color: C.white, letterSpacing: -0.3 },
+  modalSubtitle:     { fontSize: 13, color: C.white35 },
+  packages:          { maxHeight: 280 },
+  packageRow:        { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 0.5, borderBottomColor: C.white05 },
+  packageLabel:      { fontSize: 15, fontWeight: '600', color: C.white70, marginBottom: 2 },
+  packageCredits:    { fontSize: 12, color: C.white35 },
+  bonusBadge:        { backgroundColor: 'rgba(93,202,165,0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99 },
+  bonusText:         { color: '#5DCAA5', fontSize: 12, fontWeight: '600' },
+  cancelBtn:         { alignItems: 'center', paddingVertical: 14 },
+  cancelText:        { fontSize: 14, color: C.white35 },
 });

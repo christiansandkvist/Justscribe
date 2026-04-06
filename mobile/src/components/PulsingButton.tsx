@@ -1,12 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  TouchableOpacity,
-  Animated,
-  StyleSheet,
-  View,
-  Text,
-} from 'react-native';
-import { Colors, BorderRadius } from '../constants/theme';
+import { TouchableOpacity, Animated, StyleSheet, View, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface Props {
   onPress: () => void;
@@ -20,16 +14,8 @@ export function PulsingButton({ onPress, isRecording }: Props) {
     if (isRecording) {
       const animation = Animated.loop(
         Animated.sequence([
-          Animated.timing(pulse, {
-            toValue: 1.15,
-            duration: 700,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulse, {
-            toValue: 1,
-            duration: 700,
-            useNativeDriver: true,
-          }),
+          Animated.timing(pulse, { toValue: 1.15, duration: 700, useNativeDriver: true }),
+          Animated.timing(pulse, { toValue: 1, duration: 700, useNativeDriver: true }),
         ])
       );
       animation.start();
@@ -40,20 +26,27 @@ export function PulsingButton({ onPress, isRecording }: Props) {
   }, [isRecording, pulse]);
 
   return (
-    <View style={styles.wrapper}>
+    <View style={s.wrapper}>
       <Animated.View
         style={[
-          styles.ring,
-          { transform: [{ scale: pulse }], opacity: isRecording ? 0.3 : 0 },
+          s.ring,
+          { transform: [{ scale: pulse }], opacity: isRecording ? 0.25 : 0 },
         ]}
       />
-      <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={0.8}
-        style={[styles.button, isRecording && styles.buttonActive]}
-      >
-        <Text style={styles.icon}>{isRecording ? '⏹' : '🎤'}</Text>
-        <Text style={styles.label}>{isRecording ? 'Stop' : 'Spela in'}</Text>
+      <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={s.button}>
+        {!isRecording && (
+          <LinearGradient
+            colors={['#64b4ff', '#a78bfa']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        )}
+        {isRecording && (
+          <View style={[StyleSheet.absoluteFill, s.recordingBg]} />
+        )}
+        <Text style={s.icon}>{isRecording ? '⏹' : '🎤'}</Text>
+        <Text style={s.label}>{isRecording ? 'Stop' : 'Spela in'}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -61,43 +54,11 @@ export function PulsingButton({ onPress, isRecording }: Props) {
 
 const BUTTON_SIZE = 160;
 
-const styles = StyleSheet.create({
-  wrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: BUTTON_SIZE + 60,
-    height: BUTTON_SIZE + 60,
-  },
-  ring: {
-    position: 'absolute',
-    width: BUTTON_SIZE + 40,
-    height: BUTTON_SIZE + 40,
-    borderRadius: (BUTTON_SIZE + 40) / 2,
-    backgroundColor: Colors.accent,
-  },
-  button: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
-    borderRadius: BUTTON_SIZE / 2,
-    backgroundColor: Colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: Colors.accent,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 10,
-  },
-  buttonActive: {
-    backgroundColor: '#CC0000',
-  },
-  icon: {
-    fontSize: 40,
-  },
-  label: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '700',
-    marginTop: 4,
-  },
+const s = StyleSheet.create({
+  wrapper:      { alignItems: 'center', justifyContent: 'center', width: BUTTON_SIZE + 60, height: BUTTON_SIZE + 60 },
+  ring:         { position: 'absolute', width: BUTTON_SIZE + 40, height: BUTTON_SIZE + 40, borderRadius: (BUTTON_SIZE + 40) / 2, backgroundColor: '#64b4ff' },
+  button:       { width: BUTTON_SIZE, height: BUTTON_SIZE, borderRadius: BUTTON_SIZE / 2, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  recordingBg:  { backgroundColor: '#CC0000', borderRadius: BUTTON_SIZE / 2 },
+  icon:         { fontSize: 40 },
+  label:        { color: '#ffffff', fontSize: 16, fontWeight: '700', marginTop: 4 },
 });

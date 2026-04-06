@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { router, useLocalSearchParams } from 'expo-router';
 import { TranscriptCard } from '../../components/TranscriptCard';
 import { BalanceBadge } from '../../components/BalanceBadge';
 import { useLanguageStore } from '../../store/languageStore';
-import { Colors, Typography, Spacing, BorderRadius } from '../../constants/theme';
 import { formatDuration, creditsToUsd } from '../../constants/pricing';
 
 export default function ResultScreen() {
@@ -47,33 +46,33 @@ export default function ResultScreen() {
   const newBalanceDisplay = '$' + (newBalance * 0.01).toFixed(2);
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t.result.title}</Text>
+    <SafeAreaView style={s.safe}>
+      <View style={s.container}>
+        <View style={s.header}>
+          <Text style={s.title}>{t.result.title}</Text>
           <BalanceBadge balanceUsdDisplay={newBalanceDisplay} />
         </View>
-        <View style={styles.statsRow}>
-          <View style={styles.stat}>
-            <Text style={styles.statLabel}>{t.result.duration}</Text>
-            <Text style={styles.statValue}>{formatDuration(durationSeconds)}</Text>
+        <View style={s.statsRow}>
+          <View style={s.stat}>
+            <Text style={s.statLabel}>{t.result.duration}</Text>
+            <Text style={s.statValue}>{formatDuration(durationSeconds)}</Text>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.stat}>
-            <Text style={styles.statLabel}>{t.result.cost}</Text>
-            <Text style={styles.statValue}>{creditsToUsd(creditsCharged)}</Text>
+          <View style={s.statDivider} />
+          <View style={s.stat}>
+            <Text style={s.statLabel}>{t.result.cost}</Text>
+            <Text style={s.statValue}>{creditsToUsd(creditsCharged)}</Text>
           </View>
         </View>
         <TranscriptCard text={transcript} />
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.btnPrimary} onPress={handleSave} activeOpacity={0.85}>
-            <Text style={styles.btnPrimaryText}>{t.result.saveTxt}</Text>
+        <View style={s.actions}>
+          <TouchableOpacity style={s.btnPrimary} onPress={handleSave} activeOpacity={0.85}>
+            <Text style={s.btnPrimaryText}>{t.result.saveTxt}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnSecondary} onPress={handleCopy} activeOpacity={0.85}>
-            <Text style={styles.btnSecondaryText}>{copied ? t.result.copied : t.result.copyText}</Text>
+          <TouchableOpacity style={s.btnSecondary} onPress={handleCopy} activeOpacity={0.85}>
+            <Text style={s.btnSecondaryText}>{copied ? t.result.copied : t.result.copyText}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnGhost} onPress={() => router.replace('/(app)/home')} activeOpacity={0.85}>
-            <Text style={styles.btnGhostText}>{t.result.newTranscription}</Text>
+          <TouchableOpacity style={s.btnGhost} onPress={() => router.replace('/(app)/home')} activeOpacity={0.85}>
+            <Text style={s.btnGhostText}>{t.result.newTranscription}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -81,21 +80,21 @@ export default function ResultScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
-  container: { flex: 1, padding: Spacing.xl, gap: Spacing.md },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  title: { ...Typography.h2 },
-  statsRow: { flexDirection: 'row', backgroundColor: Colors.surface, borderRadius: BorderRadius.md, padding: Spacing.md, alignItems: 'center' },
-  stat: { flex: 1, alignItems: 'center', gap: 2 },
-  statDivider: { width: 1, height: 32, backgroundColor: Colors.border },
-  statLabel: { ...Typography.caption },
-  statValue: { ...Typography.h3 },
-  actions: { gap: Spacing.sm },
-  btnPrimary: { height: 52, backgroundColor: Colors.primary, borderRadius: BorderRadius.md, alignItems: 'center', justifyContent: 'center' },
-  btnPrimaryText: { color: Colors.onPrimary, fontSize: 16, fontWeight: '700' },
-  btnSecondary: { height: 52, backgroundColor: Colors.surface, borderRadius: BorderRadius.md, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: Colors.border },
-  btnSecondaryText: { ...Typography.body, fontWeight: '600' },
-  btnGhost: { height: 52, alignItems: 'center', justifyContent: 'center' },
-  btnGhostText: { ...Typography.body, color: Colors.accent, fontWeight: '600' },
+const s = StyleSheet.create({
+  safe:             { flex: 1, backgroundColor: '#0d0d1a' },
+  container:        { flex: 1, padding: 24, gap: 16 },
+  header:           { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  title:            { fontSize: 24, fontWeight: '700', color: '#ffffff' },
+  statsRow:         { flexDirection: 'row', backgroundColor: '#131328', borderRadius: 12, padding: 16, alignItems: 'center' },
+  stat:             { flex: 1, alignItems: 'center', gap: 2 },
+  statDivider:      { width: 1, height: 32, backgroundColor: 'rgba(100,180,255,0.12)' },
+  statLabel:        { fontSize: 12, color: 'rgba(255,255,255,0.35)' },
+  statValue:        { fontSize: 16, fontWeight: '600', color: '#ffffff' },
+  actions:          { gap: 8 },
+  btnPrimary:       { height: 52, backgroundColor: '#64b4ff', borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  btnPrimaryText:   { color: '#ffffff', fontSize: 16, fontWeight: '700' },
+  btnSecondary:     { height: 52, backgroundColor: '#131328', borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: 'rgba(100,180,255,0.12)' },
+  btnSecondaryText: { fontSize: 15, color: '#ffffff', fontWeight: '600' },
+  btnGhost:         { height: 52, alignItems: 'center', justifyContent: 'center' },
+  btnGhostText:     { fontSize: 15, color: '#64b4ff', fontWeight: '600' },
 });

@@ -8,7 +8,7 @@ export function registerTranscribeLiveTool(server: McpServer) {
     'transcribe_live_recording',
     {
       description: `Transcribe a completed live recording captured via microphone.
-The recording is passed as base64-encoded audio (e.g. recorded with the ScribeToGo mobile app or any recorder).
+The recording is passed as base64-encoded audio (e.g. recorded with the Vocri mobile app or any recorder).
 Uses the same Google STT pipeline as file transcription but tagged as a live recording in usage logs.
 Charges prepaid credits per second of audio.`,
       inputSchema: {

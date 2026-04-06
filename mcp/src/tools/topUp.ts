@@ -6,7 +6,7 @@ export function registerTopUpTool(server: McpServer) {
   server.registerTool(
     'top_up_balance',
     {
-      description: `Add prepaid credits to a user's ScribeToGo balance via Stripe.
+      description: `Add prepaid credits to a user's Vocri balance via Stripe.
 Returns a Stripe Checkout URL — the user must open it in their browser to complete the payment.
 Credits are added automatically after successful payment via webhook.
 

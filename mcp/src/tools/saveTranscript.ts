@@ -9,7 +9,7 @@ export function registerSaveTranscriptTool(server: McpServer) {
     'save_transcript',
     {
       description: `Save a transcript as a .txt file on the user's local disk.
-Default save location is ~/Documents/ScribeToGo/ unless overridden.
+Default save location is ~/Documents/Vocri/ unless overridden.
 Returns the full path to the saved file.`,
       inputSchema: {
         transcript: z
@@ -22,7 +22,7 @@ Returns the full path to the saved file.`,
         save_path: z
           .string()
           .optional()
-          .describe('Absolute folder path to save in (default: ~/Documents/ScribeToGo/)'),
+          .describe('Absolute folder path to save in (default: ~/Documents/Vocri/)'),
         include_metadata: z
           .boolean()
           .default(true)
@@ -41,7 +41,7 @@ Returns the full path to the saved file.`,
       // ── Resolve save directory ────────────────────────────────────────
       const dir = save_path
         ? path.resolve(save_path.replace(/^~/, os.homedir()))
-        : path.join(os.homedir(), 'Documents', 'ScribeToGo');
+        : path.join(os.homedir(), 'Documents', 'Vocri');
 
       // ── Create directory if it doesn't exist ──────────────────────────
       try {
@@ -61,7 +61,7 @@ Returns the full path to the saved file.`,
       // ── Build file content ────────────────────────────────────────────
       let content = '';
       if (include_metadata) {
-        content += `ScribeToGo Transcript\n`;
+        content += `Vocri Transcript\n`;
         content += `=====================\n`;
         content += `Date:     ${now.toLocaleString()}\n`;
         if (model) content += `Model:    ${model === 'chirp' ? 'Chirp (Google STT v2)' : 'Standard (Google STT v1)'}\n`;

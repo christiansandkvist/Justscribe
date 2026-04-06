@@ -22,7 +22,7 @@ function getRedirectUrl(): string {
       ? window.location.origin + '/auth/callback'
       : 'http://localhost:8081/auth/callback';
   }
-  return 'scribetogo://auth/callback';
+  return 'vocri://auth/callback';
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -34,8 +34,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialize: async () => {
     try {
       const { data } = await supabase.auth.getSession();
+      console.log('[auth] session:', data.session?.user?.email ?? 'none');
       set({ session: data.session, user: data.session?.user ?? null, initialized: true });
       supabase.auth.onAuthStateChange((_event, session) => {
+        console.log('[auth] state change:', session?.user?.email ?? 'none');
         set({ session, user: session?.user ?? null });
       });
     } catch (e) {
@@ -95,7 +97,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         if (error) throw error;
         if (data.url) {
           const WebBrowser = require('expo-web-browser');
-          const result = await WebBrowser.openAuthSessionAsync(data.url, 'scribetogo://auth/callback');
+          const result = await WebBrowser.openAuthSessionAsync(data.url, 'vocri://auth/callback');
           if (result.type === 'success' && result.url) {
             const urlObj = new URL(result.url);
             const params = new URLSearchParams(urlObj.hash.slice(1));

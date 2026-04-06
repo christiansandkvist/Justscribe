@@ -9,7 +9,6 @@ import {
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranscription } from '../../hooks/useTranscription';
 import { ProgressBar } from '../../components/ProgressBar';
-import { Colors, Typography, Spacing } from '../../constants/theme';
 import { formatDuration } from '../../constants/pricing';
 import type { TranscriptionModel } from '../../types';
 
@@ -67,53 +66,38 @@ export default function ProcessingScreen() {
     'Förbereder...';
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.container}>
-        <View style={styles.center}>
-          <Text style={styles.title}>Bearbetar</Text>
+    <SafeAreaView style={s.safe}>
+      <View style={s.container}>
+        <View style={s.center}>
+          <Text style={s.title}>Bearbetar</Text>
 
           {durationSeconds > 0 && (
-            <Text style={styles.duration}>
+            <Text style={s.duration}>
               Fillängd: {formatDuration(durationSeconds)}
             </Text>
           )}
 
-          <View style={styles.progressContainer}>
+          <View style={s.progressContainer}>
             <ProgressBar progress={progress} />
-            <Text style={styles.progressLabel}>{Math.round(progress)}%</Text>
+            <Text style={s.progressLabel}>{Math.round(progress)}%</Text>
           </View>
 
-          <Text style={styles.statusLabel}>{statusLabel}</Text>
-          <Text style={styles.hint}>Stäng inte appen — vi arbetar på det</Text>
+          <Text style={s.statusLabel}>{statusLabel}</Text>
+          <Text style={s.hint}>Stäng inte appen — vi arbetar på det</Text>
         </View>
       </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
-  container: {
-    flex: 1,
-    padding: Spacing.xl,
-    justifyContent: 'center',
-  },
-  center: {
-    alignItems: 'center',
-    gap: Spacing.xl,
-  },
-  title: { ...Typography.h1 },
-  duration: { ...Typography.bodySmall },
-  progressContainer: {
-    width: '100%',
-    gap: Spacing.sm,
-    alignItems: 'center',
-  },
-  progressLabel: {
-    ...Typography.body,
-    fontWeight: '700',
-    color: Colors.accent,
-  },
-  statusLabel: { ...Typography.h3, color: Colors.secondary },
-  hint: { ...Typography.caption, textAlign: 'center' },
+const s = StyleSheet.create({
+  safe:              { flex: 1, backgroundColor: '#0d0d1a' },
+  container:         { flex: 1, padding: 24, justifyContent: 'center' },
+  center:            { alignItems: 'center', gap: 24 },
+  title:             { fontSize: 32, fontWeight: '700', color: '#ffffff' },
+  duration:          { fontSize: 13, color: 'rgba(255,255,255,0.55)' },
+  progressContainer: { width: '100%', gap: 8, alignItems: 'center' },
+  progressLabel:     { fontSize: 15, color: '#64b4ff', fontWeight: '700' },
+  statusLabel:       { fontSize: 16, fontWeight: '600', color: 'rgba(255,255,255,0.55)' },
+  hint:              { fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center' },
 });

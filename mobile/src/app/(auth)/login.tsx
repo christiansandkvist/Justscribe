@@ -1,9 +1,47 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
-import { Colors, Spacing, BorderRadius } from '../../constants/theme';
+
+const C = {
+  bg:        '#0d0d1a',
+  surface:   '#131328',
+  border:    'rgba(100,180,255,0.12)',
+  white:     '#ffffff',
+  white70:   'rgba(255,255,255,0.70)',
+  white35:   'rgba(255,255,255,0.35)',
+  white08:   'rgba(255,255,255,0.08)',
+  white05:   'rgba(255,255,255,0.05)',
+  cyan:      '#64b4ff',
+  purple:    '#a78bfa',
+};
+
+function WaveformIcon({ size = 28 }: { size?: number }) {
+  const bars = [0.45, 0.75, 1, 0.75, 0.45];
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, height: size }}>
+      {bars.map((ratio, i) => (
+        <LinearGradient
+          key={i}
+          colors={[C.cyan, C.purple]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{ width: 3, height: size * ratio, borderRadius: 2, opacity: 0.85 }}
+        />
+      ))}
+    </View>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <View style={g.container}>
+      <Text style={g.text}>G</Text>
+    </View>
+  );
+}
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -27,77 +65,93 @@ export default function LoginScreen() {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.wordmark}>
-            <Text style={styles.wBold}>S</Text><Text style={styles.wLight}>cribe</Text>
-            <Text style={styles.wBold}>T</Text><Text style={styles.wLight}>o</Text>
-            <Text style={styles.wBold}>G</Text><Text style={styles.wLight}>o</Text>
-            <Text style={styles.wSmall}>.com</Text>
-          </Text>
-          <Text style={styles.tagline}>{t.auth.loginTagline}</Text>
+    <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+
+        <View style={s.header}>
+          <View style={s.logoRow}>
+            <WaveformIcon size={28} />
+            <Text style={s.wordmark}>Vocri</Text>
+          </View>
+          <Text style={s.tagline}>{t.auth.loginTagline}</Text>
         </View>
-        <View style={styles.form}>
-          <TextInput style={styles.input} placeholder={t.auth.email} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} placeholderTextColor={Colors.secondary} returnKeyType="next" />
-          <TextInput style={styles.input} placeholder={t.auth.password} value={password} onChangeText={setPassword} secureTextEntry placeholderTextColor={Colors.secondary} returnKeyType="done" onSubmitEditing={handleLogin} />
-          <TouchableOpacity style={[styles.btnPrimary, loading && styles.btnDisabled]} onPress={handleLogin} disabled={loading} activeOpacity={0.85}>
-            <Text style={styles.btnPrimaryText}>{loading ? t.auth.loggingIn : t.auth.login}</Text>
+
+        <View style={s.form}>
+          <TextInput
+            style={s.input}
+            placeholder={t.auth.email}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholderTextColor={C.white35}
+            returnKeyType="next"
+          />
+          <TextInput
+            style={s.input}
+            placeholder={t.auth.password}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholderTextColor={C.white35}
+            returnKeyType="done"
+            onSubmitEditing={handleLogin}
+          />
+          <TouchableOpacity style={[s.btnPrimary, loading && s.btnDisabled]} onPress={handleLogin} disabled={loading} activeOpacity={0.85}>
+            <LinearGradient colors={[C.cyan, C.purple]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+            <Text style={s.btnPrimaryText}>{loading ? t.auth.loggingIn : t.auth.login}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.forgotBtn} onPress={() => router.push('/(auth)/forgot-password')}>
-            <Text style={styles.forgotText}>{t.auth.forgotPassword}</Text>
+          <TouchableOpacity style={s.forgotBtn} onPress={() => router.push('/(auth)/forgot-password')}>
+            <Text style={s.forgotText}>{t.auth.forgotPassword}</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>{t.auth.orDivider}</Text>
-          <View style={styles.dividerLine} />
+
+        <View style={s.divider}>
+          <View style={s.dividerLine} />
+          <Text style={s.dividerText}>{t.auth.orDivider}</Text>
+          <View style={s.dividerLine} />
         </View>
-        <TouchableOpacity style={[styles.btnGoogle, loading && styles.btnDisabled]} onPress={handleGoogle} disabled={loading} activeOpacity={0.85}>
+
+        <TouchableOpacity style={[s.btnGoogle, loading && s.btnDisabled]} onPress={handleGoogle} disabled={loading} activeOpacity={0.85}>
           <GoogleIcon />
-          <Text style={styles.btnGoogleText}>{t.auth.continueGoogle}</Text>
+          <Text style={s.btnGoogleText}>{t.auth.continueGoogle}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.footer} onPress={() => router.push('/(auth)/register')}>
-          <Text style={styles.footerText}>{t.auth.noAccount} <Text style={styles.footerLink}>{t.auth.register}</Text></Text>
+
+        <TouchableOpacity style={s.footer} onPress={() => router.push('/(auth)/register')}>
+          <Text style={s.footerText}>{t.auth.noAccount} <Text style={s.footerLink}>{t.auth.register}</Text></Text>
         </TouchableOpacity>
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
-function GoogleIcon() {
-  return (
-    <View style={gStyles.container}><Text style={gStyles.g}>G</Text></View>
-  );
-}
-
-const gStyles = StyleSheet.create({
-  container: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', marginRight: Spacing.sm, borderWidth: 1, borderColor: '#E5E5E5' },
-  g: { fontSize: 13, fontWeight: '700', color: '#4285F4', lineHeight: 17 },
+const g = StyleSheet.create({
+  container: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', marginRight: 8, borderWidth: 1, borderColor: '#E5E5E5' },
+  text: { fontSize: 13, fontWeight: '700', color: '#4285F4', lineHeight: 17 },
 });
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  scroll: { flexGrow: 1, paddingHorizontal: Spacing.xl, paddingTop: 80, paddingBottom: Spacing.xl, justifyContent: 'center', gap: Spacing.lg },
-  header: { alignItems: 'center', gap: Spacing.xs, marginBottom: Spacing.md },
-  wordmark: { fontSize: 40, color: Colors.accent, letterSpacing: -0.5 },
-  wBold: { fontWeight: '800' },
-  wLight: { fontWeight: '300' },
-  wSmall: { fontSize: 24, fontWeight: '300' },
-  tagline: { fontSize: 15, color: Colors.secondary, fontWeight: '400' },
-  form: { gap: Spacing.sm },
-  input: { height: 52, borderWidth: 1.5, borderColor: Colors.border, borderRadius: BorderRadius.md, paddingHorizontal: Spacing.md, fontSize: 16, color: Colors.primary, backgroundColor: Colors.surface },
-  btnPrimary: { height: 52, backgroundColor: Colors.primary, borderRadius: BorderRadius.md, alignItems: 'center', justifyContent: 'center', marginTop: Spacing.xs },
-  btnPrimaryText: { color: Colors.onPrimary, fontSize: 16, fontWeight: '600' },
-  btnDisabled: { opacity: 0.45 },
-  forgotBtn: { alignItems: 'center', paddingVertical: Spacing.xs },
-  forgotText: { fontSize: 14, color: Colors.accent, fontWeight: '500' },
-  divider: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.border },
-  dividerText: { fontSize: 13, color: Colors.secondary },
-  btnGoogle: { height: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: BorderRadius.md, borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.white },
-  btnGoogleText: { fontSize: 16, fontWeight: '600', color: Colors.onPrimary },
-  footer: { alignItems: 'center', paddingVertical: Spacing.sm },
-  footerText: { fontSize: 14, color: Colors.secondary },
-  footerLink: { color: Colors.primary, fontWeight: '600' },
+const s = StyleSheet.create({
+  container:      { flex: 1, backgroundColor: '#0d0d1a' },
+  scroll:         { flexGrow: 1, paddingHorizontal: 24, paddingTop: 80, paddingBottom: 24, justifyContent: 'center', gap: 20 },
+  header:         { alignItems: 'center', gap: 8, marginBottom: 8 },
+  logoRow:        { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
+  wordmark:       { fontSize: 36, fontWeight: '600', color: '#ffffff', letterSpacing: -1 },
+  tagline:        { fontSize: 14, color: 'rgba(255,255,255,0.35)', fontWeight: '400', textAlign: 'center' },
+  form:           { gap: 12 },
+  input:          { height: 52, borderWidth: 1, borderColor: 'rgba(100,180,255,0.12)', borderRadius: 12, paddingHorizontal: 16, fontSize: 16, color: '#ffffff', backgroundColor: '#131328' },
+  btnPrimary:     { height: 52, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginTop: 4, overflow: 'hidden' },
+  btnPrimaryText: { color: '#ffffff', fontSize: 16, fontWeight: '600', zIndex: 1 },
+  btnDisabled:    { opacity: 0.45 },
+  forgotBtn:      { alignItems: 'center', paddingVertical: 6 },
+  forgotText:     { fontSize: 14, color: '#64b4ff', fontWeight: '500' },
+  divider:        { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  dividerLine:    { flex: 1, height: 0.5, backgroundColor: 'rgba(255,255,255,0.08)' },
+  dividerText:    { fontSize: 13, color: 'rgba(255,255,255,0.35)' },
+  btnGoogle:      { height: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', backgroundColor: '#ffffff' },
+  btnGoogleText:  { fontSize: 16, fontWeight: '600', color: '#0d0d1a' },
+  footer:         { alignItems: 'center', paddingVertical: 8 },
+  footerText:     { fontSize: 14, color: 'rgba(255,255,255,0.35)' },
+  footerLink:     { color: '#a78bfa', fontWeight: '600' },
 });

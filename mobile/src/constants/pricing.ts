@@ -2,8 +2,8 @@ import { TopUpPackage, PricingConfig } from '../types';
 
 // Display-only defaults — authoritative values come from GET /api/balance
 export const DEFAULT_PRICING: Record<string, PricingConfig> = {
-  standard: { model: 'standard', credits_per_second: 0.004, usd_per_credit: 0.01 },
-  chirp: { model: 'chirp', credits_per_second: 0.0168, usd_per_credit: 0.01 },
+  standard: { model: 'standard', credits_per_second: 0.0533, usd_per_credit: 0.01 },
+  chirp: { model: 'chirp', credits_per_second: 0.0133, usd_per_credit: 0.01 },
 };
 
 export const TOP_UP_PACKAGES: TopUpPackage[] = [

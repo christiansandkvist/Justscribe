@@ -6,10 +6,15 @@ export default function AppLayout() {
   const { session, initialized } = useAuthStore();
 
   useEffect(() => {
-    if (initialized && !session) {
-      router.replace('/(auth)/login');
+    if (!initialized) return;
+    if (!session) {
+      setTimeout(() => {
+        router.replace('/(auth)/login');
+      }, 100);
     }
   }, [session, initialized]);
+
+  if (!initialized) return null;
 
   return (
     <Stack
