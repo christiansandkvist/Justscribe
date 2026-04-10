@@ -1,4 +1,4 @@
-export type TranscriptionModel = 'standard' | 'chirp';
+export type TranscriptionModel = 'whisper';
 
 export interface BalanceState {
   balance_credits: number;
@@ -37,17 +37,9 @@ export interface TopUpPackage {
 // Navigation params
 export type RootStackParamList = {
   '(app)/home': undefined;
-  '(app)/choose-speed': {
-    source: 'record' | 'file';
-    fileUri?: string;
-    fileDurationSeconds?: number;
-  };
-  '(app)/record': {
-    model: TranscriptionModel;
-  };
+  '(app)/record': undefined;
   '(app)/processing': {
     fileUri: string;
-    model: TranscriptionModel;
     durationSeconds: number;
   };
   '(app)/result': {

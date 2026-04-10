@@ -1,4 +1,4 @@
-export type TranscriptionModel = 'standard' | 'chirp';
+export type TranscriptionModel = 'whisper';
 
 export interface AuthenticatedRequest extends Request {
   user: {

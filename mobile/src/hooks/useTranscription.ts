@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import api from '../services/api';
-import { TranscriptionModel, TranscriptionResult } from '../types';
+import { TranscriptionResult } from '../types';
 
 export type TranscriptionStatus = 'idle' | 'uploading' | 'processing' | 'done' | 'error';
 
@@ -12,7 +12,6 @@ export function useTranscription() {
   const transcribe = useCallback(
     async (
       fileUri: string,
-      model: TranscriptionModel,
       languageCode = 'en-US'
     ): Promise<TranscriptionResult | null> => {
       setStatus('uploading');
@@ -26,7 +25,6 @@ export function useTranscription() {
 
         const formData = new FormData();
         formData.append('file', { uri: fileUri, name: fileName, type: mimeType } as any);
-        formData.append('model', model);
         formData.append('language', languageCode);
 
         setStatus('processing');
@@ -37,7 +35,7 @@ export function useTranscription() {
         }, 300);
 
         const { data } = await api.post<TranscriptionResult>(
-          model === 'chirp' ? '/api/transcribe/stream' : '/api/transcribe/file',
+          '/api/transcribe/file',
           formData,
           {
             headers: { 'Content-Type': 'multipart/form-data' },
@@ -51,7 +49,12 @@ export function useTranscription() {
         return data;
       } catch (err: any) {
         setStatus('error');
-        setError(err.message ?? 'Transcription failed');
+        const message = err.response?.data?.error ?? err.message ?? 'Transcription failed';
+        if (message.includes('INSUFFICIENT_BALANCE') || message === 'insufficient_balance') {
+          setError('insufficient_balance');
+        } else {
+          setError(message);
+        }
         return null;
       }
     },

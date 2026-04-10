@@ -1,9 +1,11 @@
 import { TopUpPackage, PricingConfig } from '../types';
 
-// Display-only defaults — authoritative values come from GET /api/balance
-export const DEFAULT_PRICING: Record<string, PricingConfig> = {
-  standard: { model: 'standard', credits_per_second: 0.0533, usd_per_credit: 0.01 },
-  chirp: { model: 'chirp', credits_per_second: 0.0133, usd_per_credit: 0.01 },
+// $0.01/min → 0.01/60 = $0.0001667/sec → 0.0167 credits/sec (at $0.01/credit)
+// Authoritative values come from GET /api/balance — this is the display fallback
+export const DEFAULT_PRICING: PricingConfig = {
+  model: 'whisper',
+  credits_per_second: 0.0167,
+  usd_per_credit: 0.01,
 };
 
 export const TOP_UP_PACKAGES: TopUpPackage[] = [
@@ -15,7 +17,7 @@ export const TOP_UP_PACKAGES: TopUpPackage[] = [
 
 export function estimateCost(
   durationSeconds: number,
-  pricing: PricingConfig
+  pricing: PricingConfig = DEFAULT_PRICING
 ): { credits: number; usd: string } {
   const credits = durationSeconds * pricing.credits_per_second;
   const usd = credits * pricing.usd_per_credit;

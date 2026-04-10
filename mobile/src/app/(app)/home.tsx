@@ -69,8 +69,7 @@ const BalanceCard: React.FC<{
     outputRange: ['0%', '100%'],
   });
 
-  const standardMins = Math.floor(balanceCredits / (0.0133 * 60));
-  const fastMins = Math.floor(balanceCredits / (0.0533 * 60));
+  const whisperMins = Math.floor(balanceCredits / (0.0167 * 60));
   const usdDisplay = '$' + (balanceCredits * 0.01).toFixed(2);
 
   return (
@@ -83,7 +82,7 @@ const BalanceCard: React.FC<{
       </View>
       <Text style={s.balAmount}>{loading ? '—' : usdDisplay}</Text>
       <Text style={s.balSub}>{loading ? '—' : balanceCredits} credits</Text>
-      <Text style={s.balMins}>{loading ? '' : `Standard: ~${standardMins}min · Fast: ~${fastMins}min`}</Text>
+      <Text style={s.balMins}>{loading ? '' : `~${whisperMins} min of transcription`}</Text>
       <View style={s.progressTrack}>
         <Animated.View style={[s.progressFillWrap, { width: progressWidth }]}>
           <LinearGradient
@@ -109,7 +108,7 @@ export default function HomeScreen() {
   const [showTopUp, setShowTopUp] = useState(false);
 
   async function handleRecord() {
-    router.push({ pathname: '/(app)/choose-speed', params: { source: 'record' } });
+    router.push({ pathname: '/(app)/record' });
   }
 
   async function handleUpload() {
@@ -117,8 +116,8 @@ export default function HomeScreen() {
     if (!file) return;
     const durationSeconds = await getAudioDuration(file.uri);
     router.push({
-      pathname: '/(app)/choose-speed',
-      params: { source: 'file', fileUri: file.uri, fileDurationSeconds: String(Math.ceil(durationSeconds)) },
+      pathname: '/(app)/processing',
+      params: { fileUri: file.uri, durationSeconds: String(Math.ceil(durationSeconds)) },
     });
   }
 
@@ -179,6 +178,39 @@ export default function HomeScreen() {
             <Text style={s.actionSub}>Audio file</Text>
           </TouchableOpacity>
         </View>
+
+        <View style={s.promoCard}>
+          <Text style={s.promoTag}>Vocri · Pay as you go</Text>
+          <Text style={s.promoHeadline}>The simplest & cheapest way to transcribe.</Text>
+          <Text style={s.promoSub}>Built for humans and AI agents. No subscriptions — ever.</Text>
+
+          <View style={s.promoNodes}>
+            <View style={s.nodeRow}>
+              <View style={[s.node, s.nodeCyan]}><Text style={s.nodeText}>API</Text></View>
+              <View style={[s.node, s.nodePurple]}><Text style={s.nodeText}>MCP</Text></View>
+            </View>
+            <View style={s.nodeCenter}>
+              <View style={s.nodeLine} />
+              <View style={[s.node, s.nodeMain]}>
+                <LinearGradient colors={['#64b4ff', '#a78bfa']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                <Text style={s.nodeMainText}>Vocri</Text>
+              </View>
+              <View style={s.nodeLine} />
+            </View>
+            <View style={s.nodeRow}>
+              <View style={[s.node, s.nodeTeal]}><Text style={s.nodeText}>Mobile</Text></View>
+              <View style={[s.node, s.nodeGray]}><Text style={s.nodeText}>AI agents</Text></View>
+            </View>
+          </View>
+
+          <View style={s.pillRow}>
+            <View style={s.pill}><Text style={s.pillText}>REST API</Text></View>
+            <View style={s.pill}><Text style={s.pillText}>MCP server</Text></View>
+            <View style={s.pill}><Text style={s.pillText}>No subscription</Text></View>
+            <View style={[s.pill, s.pillAccent]}><Text style={[s.pillText, s.pillAccentText]}>Lowest price on market</Text></View>
+          </View>
+        </View>
+
       </ScrollView>
 
       <Modal visible={showTopUp} animationType="slide" transparent onRequestClose={() => setShowTopUp(false)}>
@@ -234,8 +266,8 @@ const s = StyleSheet.create({
   activeBadge:       { backgroundColor: C.cyanDim, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 3 },
   activeBadgeText:   { fontSize: 10, color: C.cyan, fontWeight: '500' },
   balAmount:         { fontSize: 40, fontWeight: '600', color: C.white, letterSpacing: -1.5, marginBottom: 2 },
-  balSub:            { fontSize: 12, color: C.white35, marginBottom: 2 },
-  balMins:           { fontSize: 12, color: C.white35, marginBottom: 16 },
+  balSub:            { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 2 },
+  balMins:           { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 16 },
   progressTrack:     { height: 3, backgroundColor: C.white05, borderRadius: 99, overflow: 'hidden', marginBottom: 14 },
   progressFillWrap:  { height: '100%', borderRadius: 99, overflow: 'hidden' },
   topUpInline:       { alignSelf: 'flex-start', backgroundColor: C.cyanDim, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
@@ -261,4 +293,25 @@ const s = StyleSheet.create({
   bonusText:         { color: '#5DCAA5', fontSize: 12, fontWeight: '600' },
   cancelBtn:         { alignItems: 'center', paddingVertical: 14 },
   cancelText:        { fontSize: 14, color: C.white35 },
+  promoCard:         { backgroundColor: '#131328', borderRadius: 16, padding: 20, marginTop: 16, borderWidth: 1, borderColor: 'rgba(100,180,255,0.12)' },
+  promoTag:          { fontSize: 11, fontWeight: '600', color: 'rgba(100,180,255,0.7)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 6, textAlign: 'center' },
+  promoHeadline:     { fontSize: 16, fontWeight: '600', color: '#ffffff', lineHeight: 22, marginBottom: 4, letterSpacing: -0.2 },
+  promoSub:          { fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 18, marginBottom: 20 },
+  promoNodes:        { alignItems: 'center', marginBottom: 20, gap: 8 },
+  nodeRow:           { flexDirection: 'row', gap: 12 },
+  nodeCenter:        { flexDirection: 'row', alignItems: 'center', gap: 0 },
+  nodeLine:          { width: 40, height: 1, backgroundColor: 'rgba(100,180,255,0.2)' },
+  node:              { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', backgroundColor: '#0d0d1a' },
+  nodeMain:          { paddingHorizontal: 20, paddingVertical: 9, borderRadius: 99, borderWidth: 0, backgroundColor: 'transparent', overflow: 'hidden' },
+  nodeMainText:      { fontSize: 14, fontWeight: '600', color: '#ffffff' },
+  nodeText:          { fontSize: 12, fontWeight: '500', color: 'rgba(255,255,255,0.55)' },
+  nodeCyan:          { borderColor: 'rgba(100,180,255,0.3)' },
+  nodePurple:        { borderColor: 'rgba(167,139,250,0.3)' },
+  nodeTeal:          { borderColor: 'rgba(93,202,165,0.3)' },
+  nodeGray:          { borderColor: 'rgba(255,255,255,0.1)' },
+  pillRow:           { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' },
+  pill:              { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  pillAccent:        { backgroundColor: 'rgba(100,180,255,0.1)', borderColor: 'rgba(100,180,255,0.3)' },
+  pillText:          { fontSize: 11, color: 'rgba(255,255,255,0.45)' },
+  pillAccentText:    { color: '#64b4ff' },
 });

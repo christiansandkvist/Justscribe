@@ -1,6 +1,6 @@
 import fs from 'fs';
-import { TranscriptionModel, TranscriptionResult } from '../types';
-import { transcribeFile } from './googleSttService';
+import { TranscriptionResult } from '../types';
+import { transcribeFile } from './whisperService';
 import { deductBalance, getBalance } from './balanceService';
 import { logUsage } from './usageService';
 import { getPricingConfig } from './pricingService';
@@ -8,12 +8,11 @@ import { getPricingConfig } from './pricingService';
 export async function runTranscription(params: {
   userId: string;
   filePath: string;
-  model: TranscriptionModel;
   languageCode?: string;
 }): Promise<TranscriptionResult> {
-  const { userId, filePath, model, languageCode = 'en-US' } = params;
+  const { userId, filePath } = params;
 
-  // Preflight: check balance has something (exact check happens after GCP)
+  // Preflight: check balance has something (exact check happens after transcription)
   const currentBalance = await getBalance(userId);
   if (currentBalance <= 0) {
     fs.unlinkSync(filePath);
@@ -22,9 +21,9 @@ export async function runTranscription(params: {
 
   let sttResult;
   try {
-    sttResult = await transcribeFile(filePath, model, languageCode);
+    sttResult = await transcribeFile(filePath);
   } finally {
-    // Always delete temp file, even on GCP error
+    // Always delete temp file, even on error
     try {
       fs.unlinkSync(filePath);
     } catch {
@@ -32,7 +31,7 @@ export async function runTranscription(params: {
     }
   }
 
-  const pricing = await getPricingConfig(model);
+  const pricing = await getPricingConfig('whisper');
   const credits_charged = Math.ceil(sttResult.duration_seconds * pricing.credits_per_second * 100) / 100;
 
   // Atomic deduction — throws InsufficientBalanceError if not enough credits
@@ -41,7 +40,7 @@ export async function runTranscription(params: {
   // Non-blocking usage log
   logUsage({
     userId,
-    model,
+    model: 'whisper',
     duration_seconds: sttResult.duration_seconds,
     credits_charged,
   });

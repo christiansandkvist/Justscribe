@@ -8,7 +8,6 @@ import { UnsupportedFormatError } from '../types';
 const router = Router();
 
 const bodySchema = z.object({
-  model: z.enum(['standard', 'chirp']).default('standard'),
   language: z.string().default('en-US'),
 });
 
@@ -18,7 +17,6 @@ async function handleTranscription(req: Request, res: Response, next: NextFuncti
     return;
   }
 
-  // Handle unsupported format error from multer fileFilter
   if (req.file.originalname && !req.file.path) {
     next(new UnsupportedFormatError(req.file.originalname));
     return;
@@ -32,13 +30,11 @@ async function handleTranscription(req: Request, res: Response, next: NextFuncti
     }
 
     const userId = (req as any).user.id;
-    const { model, language } = parsed.data;
 
     const result = await runTranscription({
       userId,
       filePath: req.file.path,
-      model,
-      languageCode: language,
+      languageCode: parsed.data.language,
     });
 
     res.json(result);

@@ -1,10 +1,10 @@
 import { supabase } from '../config/supabase';
 import { TranscriptionModel, PricingConfig } from '../types';
 
-// Fallback defaults if DB not seeded yet
+// Fallback default if DB not seeded yet
+// $0.01/min → 0.01/60 = $0.0001667/sec → 0.0167 credits/sec (at $0.01/credit)
 const DEFAULTS: Record<TranscriptionModel, PricingConfig> = {
-  standard: { model: 'standard', credits_per_second: 0.0533, usd_per_credit: 0.01 },
-  chirp: { model: 'chirp', credits_per_second: 0.0133, usd_per_credit: 0.01 },
+  whisper: { model: 'whisper', credits_per_second: 0.0167, usd_per_credit: 0.01 },
 };
 
 export async function getPricingConfig(model: TranscriptionModel): Promise<PricingConfig> {

@@ -1,35 +1,30 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Alert, TouchableOpacity, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { useRecorder } from '../../hooks/useRecorder';
 import { useTranscription } from '../../hooks/useTranscription';
 import { useBalance } from '../../hooks/useBalance';
 import { useLanguageStore } from '../../store/languageStore';
 import { PulsingButton } from '../../components/PulsingButton';
 import { formatDuration, estimateCost, DEFAULT_PRICING } from '../../constants/pricing';
-import type { TranscriptionModel } from '../../types';
 
 const C = {
   bg:      '#0d0d1a',
   surface: '#131328',
   border:  'rgba(100,180,255,0.12)',
   white:   '#ffffff',
-  white70: 'rgba(255,255,255,0.70)',
   white35: 'rgba(255,255,255,0.35)',
-  white08: 'rgba(255,255,255,0.08)',
   cyan:    '#64b4ff',
   purple:  '#a78bfa',
-  teal:    '#5DCAA5',
 };
 
 export default function RecordScreen() {
-  const { model } = useLocalSearchParams<{ model: TranscriptionModel }>();
   const recorder = useRecorder();
   const { transcribe, status, error } = useTranscription();
   const { balance_credits, balance_usd_display, pricing, loading } = useBalance();
   const { t } = useLanguageStore();
-  const activePricing = pricing.find((p) => p.model === model) ?? DEFAULT_PRICING[model ?? 'standard'];
+  const activePricing = pricing.find((p) => p.model === 'whisper') ?? DEFAULT_PRICING;
   const liveEstimate = estimateCost(recorder.elapsedSeconds, activePricing);
 
   useEffect(() => {
@@ -44,6 +39,21 @@ export default function RecordScreen() {
     }
   }, [error]);
 
+  async function doTranscribe(uri: string) {
+    const result = await transcribe(uri);
+    if (result) {
+      router.replace({
+        pathname: '/(app)/result',
+        params: {
+          transcript: result.transcript,
+          duration_seconds: String(result.duration_seconds),
+          credits_charged: String(result.credits_charged),
+          new_balance: String(result.new_balance),
+        },
+      });
+    }
+  }
+
   async function handlePress() {
     if (recorder.state === 'idle') {
       await recorder.start();
@@ -52,18 +62,7 @@ export default function RecordScreen() {
     } else if (recorder.state === 'recording') {
       const uri = await recorder.stop();
       if (!uri) return;
-      const result = await transcribe(uri, model ?? 'standard');
-      if (result) {
-        router.replace({
-          pathname: '/(app)/result',
-          params: {
-            transcript: result.transcript,
-            duration_seconds: String(result.duration_seconds),
-            credits_charged: String(result.credits_charged),
-            new_balance: String(result.new_balance),
-          },
-        });
-      }
+      await doTranscribe(uri);
     }
   }
 
@@ -80,14 +79,14 @@ export default function RecordScreen() {
             <Text style={s.balanceText}>{loading ? '...' : balance_credits + ' cr'}</Text>
             <Text style={s.balanceSubText}>{loading ? '' : balance_usd_display}</Text>
           </View>
-          <View style={s.modelPill}>
-            <Text style={s.modelText}>{model === 'chirp' ? t.record.fastBadge : t.record.standardBadge}</Text>
+          <View style={s.whisperPill}>
+            <Text style={s.whisperText}>Whisper</Text>
           </View>
         </View>
 
         {isPaused && recorder.wasInterrupted && (
           <View style={s.interruptBanner}>
-            <Text style={s.interruptText}>⏸ {t.record.tapToStart} — call interrupted</Text>
+            <Text style={s.interruptText}>⏸ Paused — call interrupted. Tap to resume.</Text>
           </View>
         )}
 
@@ -124,18 +123,7 @@ export default function RecordScreen() {
                 onPress={async () => {
                   const uri = await recorder.stop();
                   if (!uri) return;
-                  const result = await transcribe(uri, model ?? 'standard');
-                  if (result) {
-                    router.replace({
-                      pathname: '/(app)/result',
-                      params: {
-                        transcript: result.transcript,
-                        duration_seconds: String(result.duration_seconds),
-                        credits_charged: String(result.credits_charged),
-                        new_balance: String(result.new_balance),
-                      },
-                    });
-                  }
+                  await doTranscribe(uri);
                 }}
               >
                 <LinearGradient colors={[C.cyan, C.purple]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
@@ -169,8 +157,8 @@ const s = StyleSheet.create({
   balancePill:     { backgroundColor: '#131328', borderRadius: 99, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: 'rgba(100,180,255,0.12)' },
   balanceText:     { fontSize: 13, color: '#ffffff', fontWeight: '600' },
   balanceSubText:  { fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: '400' },
-  modelPill:       { backgroundColor: '#131328', borderRadius: 99, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
-  modelText:       { fontSize: 13, color: 'rgba(255,255,255,0.35)', fontWeight: '500' },
+  whisperPill:     { backgroundColor: '#131328', borderRadius: 99, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  whisperText:     { fontSize: 13, color: 'rgba(255,255,255,0.35)', fontWeight: '500' },
   interruptBanner: { backgroundColor: 'rgba(167,139,250,0.1)', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)' },
   interruptText:   { color: '#a78bfa', textAlign: 'center', fontWeight: '500', fontSize: 13 },
   center:          { alignItems: 'center', gap: 8 },
