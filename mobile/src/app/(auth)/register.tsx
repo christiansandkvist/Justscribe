@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
@@ -7,6 +8,7 @@ import { useLanguageStore } from '../../store/languageStore';
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { signUp, signInWithGoogle, loading } = useAuthStore();
   const { t } = useLanguageStore();
 
@@ -35,7 +37,12 @@ export default function RegisterScreen() {
         </View>
         <View style={s.form}>
           <TextInput style={s.input} placeholder={t.auth.email} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} placeholderTextColor="rgba(255,255,255,0.35)" returnKeyType="next" />
-          <TextInput style={s.input} placeholder={t.auth.passwordHint} value={password} onChangeText={setPassword} secureTextEntry placeholderTextColor="rgba(255,255,255,0.35)" returnKeyType="done" onSubmitEditing={handleRegister} />
+          <View style={s.passwordWrapper}>
+            <TextInput style={s.passwordInput} placeholder={t.auth.passwordHint} value={password} onChangeText={setPassword} secureTextEntry={!showPassword} placeholderTextColor="rgba(255,255,255,0.35)" returnKeyType="done" onSubmitEditing={handleRegister} />
+            <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPassword(v => !v)} activeOpacity={0.7}>
+              <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color="rgba(255,255,255,0.35)" />
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity style={[s.btnPrimary, loading && s.btnDisabled]} onPress={handleRegister} disabled={loading} activeOpacity={0.85}>
             <Text style={s.btnPrimaryText}>{loading ? t.auth.creatingAccount : t.auth.createAccount}</Text>
           </TouchableOpacity>
@@ -74,6 +81,9 @@ const s = StyleSheet.create({
   subtitle:       { fontSize: 15, color: 'rgba(255,255,255,0.55)' },
   form:           { gap: 8 },
   input:          { height: 52, borderWidth: 1.5, borderColor: 'rgba(100,180,255,0.12)', borderRadius: 12, paddingHorizontal: 16, fontSize: 16, color: '#ffffff', backgroundColor: '#131328' },
+  passwordWrapper:{ height: 52, flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderColor: 'rgba(100,180,255,0.12)', borderRadius: 12, backgroundColor: '#131328' },
+  passwordInput:  { flex: 1, height: '100%', paddingHorizontal: 16, fontSize: 16, color: '#ffffff' },
+  eyeBtn:         { paddingHorizontal: 14, height: '100%', alignItems: 'center', justifyContent: 'center' },
   btnPrimary:     { height: 52, backgroundColor: '#64b4ff', borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   btnPrimaryText: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
   btnDisabled:    { opacity: 0.45 },

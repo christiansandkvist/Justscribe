@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
@@ -46,6 +47,7 @@ function GoogleIcon() {
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn, signInWithGoogle, loading } = useAuthStore();
   const { t } = useLanguageStore();
 
@@ -88,16 +90,21 @@ export default function LoginScreen() {
             placeholderTextColor={C.white35}
             returnKeyType="next"
           />
-          <TextInput
-            style={s.input}
-            placeholder={t.auth.password}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor={C.white35}
-            returnKeyType="done"
-            onSubmitEditing={handleLogin}
-          />
+          <View style={s.passwordWrapper}>
+            <TextInput
+              style={s.passwordInput}
+              placeholder={t.auth.password}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              placeholderTextColor={C.white35}
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
+            />
+            <TouchableOpacity style={s.eyeBtn} onPress={() => setShowPassword(v => !v)} activeOpacity={0.7}>
+              <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color={C.white35} />
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity style={[s.btnPrimary, loading && s.btnDisabled]} onPress={handleLogin} disabled={loading} activeOpacity={0.85}>
             <LinearGradient colors={[C.cyan, C.purple]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
             <Text style={s.btnPrimaryText}>{loading ? t.auth.loggingIn : t.auth.login}</Text>
@@ -141,6 +148,9 @@ const s = StyleSheet.create({
   tagline:        { fontSize: 14, color: 'rgba(255,255,255,0.35)', fontWeight: '400', textAlign: 'center' },
   form:           { gap: 12 },
   input:          { height: 52, borderWidth: 1, borderColor: 'rgba(100,180,255,0.12)', borderRadius: 12, paddingHorizontal: 16, fontSize: 16, color: '#ffffff', backgroundColor: '#131328' },
+  passwordWrapper:{ height: 52, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(100,180,255,0.12)', borderRadius: 12, backgroundColor: '#131328' },
+  passwordInput:  { flex: 1, height: '100%', paddingHorizontal: 16, fontSize: 16, color: '#ffffff' },
+  eyeBtn:         { paddingHorizontal: 14, height: '100%', alignItems: 'center', justifyContent: 'center' },
   btnPrimary:     { height: 52, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginTop: 4, overflow: 'hidden' },
   btnPrimaryText: { color: '#ffffff', fontSize: 16, fontWeight: '600', zIndex: 1 },
   btnDisabled:    { opacity: 0.45 },
