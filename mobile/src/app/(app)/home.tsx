@@ -102,7 +102,7 @@ const BalanceCard: React.FC<{
 
 export default function HomeScreen() {
   const { balance_credits, balance_usd_display, loading, refresh } = useBalance();
-  const { topUp, loading: paymentLoading } = usePayment();
+  const { topUp, loading: paymentLoading, error: paymentError } = usePayment();
   const { signOut, user } = useAuthStore();
   const { t, language, setLanguage } = useLanguageStore();
   const [showTopUp, setShowTopUp] = useState(false);
@@ -126,6 +126,8 @@ export default function HomeScreen() {
     const success = await topUp(pkg.amount_usd_cents);
     if (success) {
       Alert.alert('', pkg.credits + ' credits added.', [{ text: t.auth.ok, onPress: refresh }]);
+    } else if (paymentError) {
+      Alert.alert('Payment failed', paymentError);
     }
   }
 
