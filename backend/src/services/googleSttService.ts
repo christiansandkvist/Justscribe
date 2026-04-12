@@ -22,7 +22,7 @@ export async function transcribeFile(
   model: TranscriptionModel,
   languageCode = 'en-US'
 ): Promise<SttResult> {
-  if (model === 'chirp') {
+  if ((model as string) === 'chirp') {
     return transcribeChirp(filePath, languageCode);
   }
   return transcribeStandard(filePath, languageCode);
@@ -61,7 +61,7 @@ async function transcribeStandard(
   }
 
   const transcript = response.results
-    .map((r) => r.alternatives?.[0]?.transcript ?? '')
+    .map((r: any) => r.alternatives?.[0]?.transcript ?? '')
     .join(' ')
     .trim();
 
