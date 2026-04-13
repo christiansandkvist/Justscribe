@@ -2,13 +2,18 @@ import { useState, useCallback } from 'react';
 import { useStripe } from '@stripe/stripe-react-native';
 import api from '../services/api';
 
+export interface TopUpResult {
+  success: boolean;
+  errorMsg?: string;
+}
+
 export function usePayment() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const topUp = useCallback(
-    async (amount_usd_cents: number): Promise<boolean> => {
+    async (amount_usd_cents: number): Promise<TopUpResult> => {
       setLoading(true);
       setError(null);
 
@@ -20,24 +25,28 @@ export function usePayment() {
 
         const { error: initError } = await initPaymentSheet({
           paymentIntentClientSecret: data.client_secret,
-          merchantDisplayName: 'ScribeToGo',
+          merchantDisplayName: 'Vocri',
           allowsDelayedPaymentMethods: false,
         });
 
-        if (initError) { setError(initError.message); return false; }
+        if (initError) {
+          setError(initError.message);
+          return { success: false, errorMsg: initError.message };
+        }
 
         const { error: presentError } = await presentPaymentSheet();
 
         if (presentError) {
-          if (presentError.code === 'Canceled') return false;
+          if (presentError.code === 'Canceled') return { success: false };
           setError(presentError.message);
-          return false;
+          return { success: false, errorMsg: presentError.message };
         }
 
-        return true;
+        return { success: true };
       } catch (err: any) {
-        setError(err.message ?? 'Payment failed');
-        return false;
+        const msg = err.message ?? 'Payment failed';
+        setError(msg);
+        return { success: false, errorMsg: msg };
       } finally {
         setLoading(false);
       }

@@ -123,11 +123,11 @@ export default function HomeScreen() {
 
   async function handleTopUp(pkg: TopUpPackage) {
     setShowTopUp(false);
-    const success = await topUp(pkg.amount_usd_cents);
-    if (success) {
-      Alert.alert('', pkg.credits + ' credits added.', [{ text: t.auth.ok, onPress: refresh }]);
-    } else if (paymentError) {
-      Alert.alert('Payment failed', paymentError);
+    const result = await topUp(pkg.amount_usd_cents);
+    if (result.success) {
+      Alert.alert('', pkg.credits + ' credits added!', [{ text: t.auth.ok, onPress: refresh }]);
+    } else if (result.errorMsg) {
+      Alert.alert('Payment failed', result.errorMsg);
     }
   }
 
