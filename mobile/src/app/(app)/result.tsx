@@ -28,7 +28,7 @@ export default function ResultScreen() {
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
     const timestamp = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '_' + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
-    const filename = 'scribetogo_' + timestamp + '.txt';
+    const filename = 'vocri_' + timestamp + '.txt';
     try {
       const fileUri = FileSystem.cacheDirectory + filename;
       await FileSystem.writeAsStringAsync(fileUri, transcript, { encoding: FileSystem.EncodingType.UTF8 });
