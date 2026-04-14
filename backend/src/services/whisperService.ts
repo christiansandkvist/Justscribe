@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import OpenAI from 'openai';
+import FormData from 'form-data';
+import axios from 'axios';
 import { UnsupportedFormatError } from '../types';
 
 const SUPPORTED_FORMATS = new Set(['.mp3', '.mp4', '.m4a', '.wav', '.webm', '.ogg', '.flac']);
@@ -20,35 +21,40 @@ export interface SttResult {
   duration_seconds: number;
 }
 
-let _client: OpenAI | null = null;
-function getClient(): OpenAI {
-  if (!_client) {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error('Missing OPENAI_API_KEY environment variable');
-    _client = new OpenAI({ apiKey });
-  }
-  return _client;
-}
-
 export async function transcribeFile(filePath: string): Promise<SttResult> {
   const ext = path.extname(filePath).toLowerCase();
   if (!SUPPORTED_FORMATS.has(ext)) throw new UnsupportedFormatError(ext);
 
-  const client = getClient();
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('Missing OPENAI_API_KEY environment variable');
 
-  // Use File object instead of ReadStream — more reliable in containerized environments
-  const buffer = fs.readFileSync(filePath);
   const mimeType = MIME_MAP[ext] ?? 'audio/mpeg';
-  const file = new File([buffer], path.basename(filePath), { type: mimeType });
 
-  const response = await client.audio.transcriptions.create({
-    file,
-    model: 'whisper-1',
-    response_format: 'verbose_json',
+  // Use axios directly instead of OpenAI SDK — avoids fetch connectivity issues in Railway
+  const form = new FormData();
+  form.append('file', fs.createReadStream(filePath), {
+    filename: path.basename(filePath),
+    contentType: mimeType,
   });
+  form.append('model', 'whisper-1');
+  form.append('response_format', 'verbose_json');
 
-  const transcript = (response as any).text?.trim() ?? '';
-  const duration_seconds = Number((response as any).duration ?? 0);
+  const response = await axios.post(
+    'https://api.openai.com/v1/audio/transcriptions',
+    form,
+    {
+      headers: {
+        ...form.getHeaders(),
+        Authorization: `Bearer ${apiKey}`,
+      },
+      timeout: 300_000,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+    }
+  );
+
+  const transcript = (response.data?.text ?? '').trim();
+  const duration_seconds = Number(response.data?.duration ?? 0);
 
   return { transcript, duration_seconds };
 }
