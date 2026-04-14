@@ -20,12 +20,18 @@ export interface SttResult {
   duration_seconds: number;
 }
 
+// Force HTTP/1.1 — avoids HTTP/2 "421 Misdirected Request" from OpenAI on Railway
+const { Agent, fetch: undiciFetch } = require('undici');
+const h1Agent = new Agent({ allowH2: false });
+const h1Fetch = (url: any, init: any) =>
+  undiciFetch(url, { ...init, dispatcher: h1Agent });
+
 let _client: OpenAI | null = null;
 function getClient(): OpenAI {
   if (!_client) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error('Missing OPENAI_API_KEY environment variable');
-    _client = new OpenAI({ apiKey });
+    _client = new OpenAI({ apiKey, fetch: h1Fetch });
   }
   return _client;
 }
