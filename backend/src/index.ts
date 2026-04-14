@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import dns from 'dns';
+dns.setDefaultResultOrder('ipv4first'); // Force IPv4 — fixes connectivity issues on some Railway regions
 import express from 'express';
 import cors from 'cors';
 
