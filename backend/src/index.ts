@@ -33,6 +33,26 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Connectivity diagnostics
+app.get('/health/connectivity', async (_req, res) => {
+  const targets = [
+    'https://api.openai.com',
+    'https://api.stripe.com',
+    'https://speech.googleapis.com',
+    'https://google.com',
+  ];
+  const results: Record<string, string> = {};
+  await Promise.all(targets.map(async (url) => {
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      results[url] = `ok (${r.status})`;
+    } catch (e: any) {
+      results[url] = `fail: ${e.message}`;
+    }
+  }));
+  res.json(results);
+});
+
 // Routes
 app.use('/api/balance', balanceRouter);
 app.use('/api/transcribe', transcriptionRouter);
