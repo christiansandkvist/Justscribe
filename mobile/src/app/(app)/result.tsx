@@ -27,8 +27,9 @@ export default function ResultScreen() {
   async function handleSave() {
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
-    const timestamp = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '_' + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
-    const filename = 'vocri_' + timestamp + '.txt';
+    const date = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+    const time = pad(now.getHours()) + '.' + pad(now.getMinutes());
+    const filename = 'vocri_' + date + '_' + time + '.txt';
     try {
       const fileUri = FileSystem.cacheDirectory + filename;
       await FileSystem.writeAsStringAsync(fileUri, transcript, { encoding: FileSystem.EncodingType.UTF8 });
