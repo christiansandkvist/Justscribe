@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import OpenAI from 'openai';
+import axios from 'axios';
+import FormData from 'form-data';
 import { UnsupportedFormatError } from '../types';
 
 const SUPPORTED_FORMATS = new Set(['.mp3', '.mp4', '.m4a', '.wav', '.webm', '.ogg', '.flac']);
@@ -20,40 +21,43 @@ export interface SttResult {
   duration_seconds: number;
 }
 
-// Force HTTP/1.1 — avoids HTTP/2 "421 Misdirected Request" from OpenAI on Railway
-const { Agent, fetch: undiciFetch } = require('undici');
-const h1Agent = new Agent({ allowH2: false });
-const h1Fetch = (url: any, init: any) =>
-  undiciFetch(url, { ...init, dispatcher: h1Agent });
-
-let _client: OpenAI | null = null;
-function getClient(): OpenAI {
-  if (!_client) {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error('Missing OPENAI_API_KEY environment variable');
-    _client = new OpenAI({ apiKey, fetch: h1Fetch });
-  }
-  return _client;
-}
-
 export async function transcribeFile(filePath: string): Promise<SttResult> {
   const ext = path.extname(filePath).toLowerCase();
   if (!SUPPORTED_FORMATS.has(ext)) throw new UnsupportedFormatError(ext);
 
-  const client = getClient();
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('Missing OPENAI_API_KEY environment variable');
 
-  const buffer = fs.readFileSync(filePath);
   const mimeType = MIME_MAP[ext] ?? 'audio/mpeg';
-  const file = new File([buffer], path.basename(filePath), { type: mimeType });
 
-  const response = await client.audio.transcriptions.create({
-    file,
-    model: 'whisper-1',
-    response_format: 'verbose_json',
+  const form = new FormData();
+  form.append('file', fs.createReadStream(filePath), {
+    filename: path.basename(filePath),
+    contentType: mimeType,
   });
+  form.append('model', 'whisper-1');
+  form.append('response_format', 'verbose_json');
 
-  const transcript = (response as any).text?.trim() ?? '';
-  const duration_seconds = Number((response as any).duration ?? 0);
+  console.log(`[whisper] POSTing ${path.basename(filePath)} (${ext}) to OpenAI…`);
+
+  const response = await axios.post(
+    'https://api.openai.com/v1/audio/transcriptions',
+    form,
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        ...form.getHeaders(),
+      },
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+      timeout: 120000, // 2 minutes
+    }
+  );
+
+  console.log('[whisper] OpenAI response status:', response.status);
+
+  const transcript = (response.data.text ?? '').trim();
+  const duration_seconds = Number(response.data.duration ?? 0);
 
   return { transcript, duration_seconds };
 }
