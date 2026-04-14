@@ -22,6 +22,14 @@ export async function runTranscription(params: {
   let sttResult;
   try {
     sttResult = await transcribeFile(filePath);
+  } catch (transcribeErr: any) {
+    console.error('[transcription] transcribeFile failed:', {
+      name: transcribeErr?.name,
+      message: transcribeErr?.message,
+      status: transcribeErr?.status,
+      stack: transcribeErr?.stack?.split('\n').slice(0, 3).join(' | '),
+    });
+    throw transcribeErr;
   } finally {
     // Always delete temp file, even on error
     try {
