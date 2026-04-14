@@ -20,7 +20,7 @@ export interface PickedFile {
 
 export async function pickAudioFile(): Promise<PickedFile | null> {
   const result = await DocumentPicker.getDocumentAsync({
-    type: SUPPORTED_MIME_TYPES,
+    type: 'audio/*',   // broad filter — shows all audio sources including iCloud & On My iPhone
     copyToCacheDirectory: true,
     multiple: false,
   });
