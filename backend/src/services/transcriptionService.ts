@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { TranscriptionResult } from '../types';
-import { transcribeFile } from './googleSttService';
+import { transcribeFile } from './whisperService';
 import { deductBalance, getBalance } from './balanceService';
 import { logUsage } from './usageService';
 import { getPricingConfig } from './pricingService';
@@ -21,7 +21,7 @@ export async function runTranscription(params: {
 
   let sttResult;
   try {
-    sttResult = await transcribeFile(filePath, 'standard', languageCode);
+    sttResult = await transcribeFile(filePath);
   } catch (transcribeErr: any) {
     console.error('[transcription] transcribeFile failed:', {
       name: transcribeErr?.name,
@@ -48,7 +48,7 @@ export async function runTranscription(params: {
   // Non-blocking usage log
   logUsage({
     userId,
-    model: 'google-stt',
+    model: 'whisper',
     duration_seconds: sttResult.duration_seconds,
     credits_charged,
   });

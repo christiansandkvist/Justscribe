@@ -5,6 +5,16 @@ import { UnsupportedFormatError } from '../types';
 
 const SUPPORTED_FORMATS = new Set(['.mp3', '.mp4', '.m4a', '.wav', '.webm', '.ogg', '.flac']);
 
+const MIME_MAP: Record<string, string> = {
+  '.mp3': 'audio/mpeg',
+  '.mp4': 'audio/mp4',
+  '.m4a': 'audio/m4a',
+  '.wav': 'audio/wav',
+  '.webm': 'audio/webm',
+  '.ogg': 'audio/ogg',
+  '.flac': 'audio/flac',
+};
+
 export interface SttResult {
   transcript: string;
   duration_seconds: number;
@@ -26,8 +36,13 @@ export async function transcribeFile(filePath: string): Promise<SttResult> {
 
   const client = getClient();
 
+  // Use File object instead of ReadStream — more reliable in containerized environments
+  const buffer = fs.readFileSync(filePath);
+  const mimeType = MIME_MAP[ext] ?? 'audio/mpeg';
+  const file = new File([buffer], path.basename(filePath), { type: mimeType });
+
   const response = await client.audio.transcriptions.create({
-    file: fs.createReadStream(filePath),
+    file,
     model: 'whisper-1',
     response_format: 'verbose_json',
   });
