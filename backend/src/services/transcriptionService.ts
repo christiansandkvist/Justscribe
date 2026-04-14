@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { TranscriptionResult } from '../types';
-import { transcribeFile } from './whisperService';
+import { transcribeFile } from './googleSttService';
 import { deductBalance, getBalance } from './balanceService';
 import { logUsage } from './usageService';
 import { getPricingConfig } from './pricingService';
@@ -10,7 +10,7 @@ export async function runTranscription(params: {
   filePath: string;
   languageCode?: string;
 }): Promise<TranscriptionResult> {
-  const { userId, filePath } = params;
+  const { userId, filePath, languageCode = 'en-US' } = params;
 
   // Preflight: check balance has something (exact check happens after transcription)
   const currentBalance = await getBalance(userId);
@@ -21,7 +21,7 @@ export async function runTranscription(params: {
 
   let sttResult;
   try {
-    sttResult = await transcribeFile(filePath);
+    sttResult = await transcribeFile(filePath, 'standard', languageCode);
   } catch (transcribeErr: any) {
     console.error('[transcription] transcribeFile failed:', {
       name: transcribeErr?.name,
@@ -48,7 +48,7 @@ export async function runTranscription(params: {
   // Non-blocking usage log
   logUsage({
     userId,
-    model: 'whisper',
+    model: 'google-stt',
     duration_seconds: sttResult.duration_seconds,
     credits_charged,
   });
